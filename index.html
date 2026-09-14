@@ -327,6 +327,57 @@ tr.done td{color:var(--ink-3)}
 .tlrow .txt{font-size:13px} .tlrow .txt b{font-weight:600}
 .tlrow .cd{font-family:var(--f-mono); font-size:11px; color:var(--ink-3); margin-left:6px}
 
+
+/* ============ 데이터 화면 ============ */
+:root{ --seq1:#DCEBE8; --seq2:#A9D2CA; --seq3:#6FB5A9; --seq4:#358E81; --seq5:#0F5F58; --nodata:#E7ECE9 }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --seq1:#153A35; --seq2:#1E5A52; --seq3:#2F8074; --seq4:#4FA99A; --seq5:#8ED3C7; --nodata:#1C2523 } }
+:root[data-theme="dark"]{ --seq1:#153A35; --seq2:#1E5A52; --seq3:#2F8074; --seq4:#4FA99A; --seq5:#8ED3C7; --nodata:#1C2523 }
+.dgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px}
+.dgrid > .panel{min-width:0}
+table.dt{min-width:0; font-size:12px}
+table.dt th, table.dt td{padding:7px 9px; vertical-align:middle}
+table.dt td.n{font-family:var(--f-mono); font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+table.dt th.n{text-align:right}
+table.dt td.k{font-weight:600; white-space:nowrap}
+table.dt td.dim{color:var(--ink-3); font-size:11.5px}
+.heat{display:inline-grid; grid-auto-flow:column; gap:2px; vertical-align:middle}
+.heat i{display:block; width:11px; height:14px; border-radius:2px; background:var(--nodata)}
+.heat i[data-q="1"]{background:var(--seq1)} .heat i[data-q="2"]{background:var(--seq2)} .heat i[data-q="3"]{background:var(--seq3)}
+.heat i[data-q="4"]{background:var(--seq4)} .heat i[data-q="5"]{background:var(--seq5)}
+.pill{display:inline-block; font-size:10px; font-weight:600; letter-spacing:.04em; padding:1px 6px; border-radius:3px; border:1px solid var(--line-strong); color:var(--ink-2); white-space:nowrap}
+.pill.ok{border-color:var(--accent-line); color:var(--accent-ink); background:var(--accent-soft)}
+.pill.part{border-color:var(--warn-line); color:var(--warn); background:var(--warn-soft)}
+.corr{border-collapse:collapse; font-family:var(--f-mono); font-size:10.5px}
+.corr th{font-weight:500; color:var(--ink-3); padding:3px 4px; text-align:center; background:none; text-transform:none; letter-spacing:0; font-size:10px; border:none}
+.corr th.rh{text-align:right; white-space:nowrap}
+.corr td{width:34px; height:26px; text-align:center; padding:0; border:1px solid var(--surface); border-radius:3px; color:var(--ink)}
+.corr td[data-q="1"]{background:var(--seq1)} .corr td[data-q="2"]{background:var(--seq2)} .corr td[data-q="3"]{background:var(--seq3)}
+.corr td[data-q="4"]{background:var(--seq4); color:#fff} .corr td[data-q="5"]{background:var(--seq5); color:#fff}
+.corr td.diag{background:var(--surface-2); color:var(--ink-3)}
+.dsel{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.dsel select, .dsel input{font:inherit; font-size:12.5px; color:var(--ink); background:var(--ground); border:1px solid var(--line); border-radius:var(--r-s); padding:6px 9px}
+.dsel input{min-width:220px}
+.maplay{display:grid; grid-template-columns:minmax(220px,1fr) minmax(200px,.9fr); gap:14px 18px; align-items:start}
+@media (max-width:640px){.maplay{grid-template-columns:1fr}}
+.kmap svg{width:100%; height:auto; display:block; max-height:420px}
+.kmap path.rg{stroke:var(--surface); stroke-width:1.2; stroke-linejoin:round; cursor:pointer; transition:filter .1s}
+.kmap path.rg:hover{filter:brightness(.88)}
+.kmap path.rg.sel{stroke:var(--ink); stroke-width:1.6}
+.kmap path.rg[data-q="0"]{fill:var(--nodata)} .kmap path.rg[data-q="1"]{fill:var(--seq1)} .kmap path.rg[data-q="2"]{fill:var(--seq2)}
+.kmap path.rg[data-q="3"]{fill:var(--seq3)} .kmap path.rg[data-q="4"]{fill:var(--seq4)} .kmap path.rg[data-q="5"]{fill:var(--seq5)}
+.kmap text{font-family:var(--f-mono); font-size:11px; fill:var(--ink); pointer-events:none; text-anchor:middle; paint-order:stroke; stroke:var(--surface); stroke-width:3px; stroke-linejoin:round}
+.rank{display:flex; flex-direction:column; gap:3px}
+.rank .rr{display:grid; grid-template-columns:40px 1fr 74px; gap:8px; align-items:center; font-size:11.5px; padding:2px 6px; border-radius:4px}
+.rank .rr.sel{background:var(--accent-soft)}
+.rank .rb{height:6px; border-radius:99px; background:var(--surface-3); overflow:hidden}
+.rank .rb i{display:block; height:100%; background:var(--accent)}
+.rank .rv{font-family:var(--f-mono); font-variant-numeric:tabular-nums; text-align:right; color:var(--ink-2)}
+.schoolhd{display:flex; gap:8px; flex-wrap:wrap; align-items:baseline; margin:10px 0 8px}
+.schoolhd b{font-family:var(--f-display); font-size:16px}
+.dnote{font-size:11.5px; color:var(--ink-3); line-height:1.55}
+.dnote a{color:var(--accent)}
+.chartlegend{display:flex; gap:14px; font-size:11px; color:var(--ink-2); margin-top:6px}
+.chartlegend i{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px; vertical-align:-1px}
 .foot{font-size:11px; color:var(--ink-3); line-height:1.6}
 @media (prefers-reduced-motion: reduce){*{transition:none !important; animation:none !important}}
 </style>
@@ -340,6 +391,7 @@ tr.done td{color:var(--ink-3)}
     <button class="navb" data-go="board"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>보드</span><span class="cnt" id="cntBoard"></span></button>
     <button class="navb" data-go="log"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>기록</span><span class="cnt" id="cntLog"></span></button>
     <button class="navb" data-go="ref"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5A2.5 2.5 0 0 1 4 20.5z"/></svg><span>참조</span></button>
+    <button class="navb" data-go="data"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="2.5"/><path d="M4 5.5v13c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5v-13"/><path d="M4 12c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5"/></svg><span>데이터</span><span class="cnt" id="cntData"></span></button>
     <div class="railfoot">
       <div class="railprog">
         <span class="pl"><span id="rpL">36주 진행</span><span id="rpR"></span></span>
@@ -466,7 +518,7 @@ var NOWW = BEFORE ? 1 : (AFTER ? 36 : CURW);
 
 /* ===================== 상태 ===================== */
 var LS = "phd-console-v1";
-var state = { w:{}, m:{}, hab:{}, pre:{} };
+var state = { w:{}, m:{}, hab:{}, pre:{}, data:{todo:{}, note:""} };
 var selW = NOWW, habM = monthKey(TODAY), screen = "today";
 
 function wk(i){
@@ -481,7 +533,8 @@ function load(){
 }
 function apply(d){
   if(!d || typeof d !== "object") return;
-  ["w","m","hab","pre"].forEach(function(k){ if(d[k] && typeof d[k] === "object") state[k] = d[k]; });
+  ["w","m","hab","pre","data"].forEach(function(k){ if(d[k] && typeof d[k] === "object") state[k] = d[k]; });
+  if(!state.data.todo) state.data.todo = {};
 }
 var saveT = null;
 function save(){
@@ -521,7 +574,8 @@ var SCREENS = {
   today:{title:"오늘", render:scToday},
   board:{title:"보드", render:scBoard},
   log:  {title:"기록", render:scLog},
-  ref:  {title:"참조", render:scRef}
+  ref:  {title:"참조", render:scRef},
+  data: {title:"데이터", render:scData}
 };
 function go(name, push){
   if(!SCREENS[name]) name = "today";
@@ -544,6 +598,7 @@ function meta(){
   document.getElementById("cntToday").textContent = "W" + pad(NOWW);
   document.getElementById("cntBoard").textContent = T.td + "/" + T.tt;
   document.getElementById("cntLog").textContent = T.hrs ? T.hrs.toFixed(0) + "h" : "";
+  var cd = document.getElementById("cntData"); if(cd) cd.textContent = TD ? TD.meta.vars + "열" : "";
   document.getElementById("rpR").textContent = "W" + pad(NOWW) + " · " + T.pct + "%";
   document.getElementById("rpBar").style.width = (NOWW/36*100) + "%";
 }
@@ -804,6 +859,200 @@ function scRef(){
   return h;
 }
 
+
+/* ===================== 화면: 데이터 (논문 패널) ===================== */
+/* data/thesis.json — build_console_data.py(비공개 논문 저장소)가 확장 패널에서 생성. 공개 공시·통계 집계값과 학교별 주요 변수만 담는다. */
+var TD = null, TDerr = null, TDloading = false;
+var DSEL = {ind:"취업률", year:null, region:null, school:null};
+var DATA_TODOS = [
+  {k:"emp25",   t:"2025년 졸업생 취업률 반영 (2026년 12월 공시 예정) → 핵심 모형 2025년 확장"},
+  {k:"sup25",   t:"2025년 정부 재정지원 현황(재정알리미 2025판) 반영"},
+  {k:"grdp25",  t:"KOSIS 지역소득 2025년 잠정치 갱신"},
+  {k:"linc12",  t:"LINC(2012)·PRIME 선정 명단 공식 출처 대조"},
+  {k:"bk21",    t:"4단계 BK21 2020년 최초 선정 명단 확보 (현재는 2026 명단)"},
+  {k:"ris",     t:"RIS 참여대학 전체 명단 (현재 총괄대학 8교)"},
+  {k:"dent",    t:"치의학전문대학원 체제 대학의 치의대 보유 판정 보완"},
+  {k:"m1ok",    t:"지도교수 승인: 핵심 모형 투입 3 · 산출 4 변수 구성"},
+  {k:"dea",     t:"확장 패널로 CCR·BCC·규모효율성 재추정 (2015~2024)"},
+  {k:"ch32",    t:"3장 2절 변수 정의 · 연구계획서 변수 표를 새 구성으로 갱신"},
+  {k:"dash",    t:"공개 대시보드(univ-panel-dashboard)를 확장 패널 기준으로 갱신"}
+];
+function loadTD(){
+  if(TD || TDloading) return; TDloading = true;
+  fetch("data/thesis.json").then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(d){ TD = d; TDloading = false; DSEL.year = lastYearWith(d, DSEL.ind); if(screen === "data") go("data", false); meta(); })
+    .catch(function(e){ TDerr = e; TDloading = false; if(screen === "data") go("data", false); });
+}
+function lastYearWith(d, ind){ var Y = d.meta.years, k;
+  for(var i = Y.length-1; i >= 0; i--){ k = String(Y[i]); var any = Object.keys(d.sido).some(function(rg){ var v = (d.sido[rg][k]||{})[ind]; return v !== undefined && v !== null; }); if(any) return k; }
+  return String(Y[Y.length-1]); }
+function nf(v, nd){ if(v === null || v === undefined || v !== v) return "—";
+  var n = +v; var s = n.toLocaleString("ko-KR", {minimumFractionDigits: nd||0, maximumFractionDigits: nd||0}); return s; }
+function q5(v, max){ if(v === null || v === undefined || !max) return 0; var r = v/max; return r >= .98 ? 5 : r >= .9 ? 4 : r >= .75 ? 3 : r >= .5 ? 2 : r > 0 ? 1 : 0; }
+function pill(st){ return '<span class="pill ' + (st.indexOf("확보") === 0 ? "ok" : "part") + '">' + esc(st) + '</span>'; }
+
+function scData(){
+  if(TDerr) return '<section class="panel"><div class="panel-hd"><h2>데이터</h2></div><div class="panel-bd">' +
+    '<p class="empty">data/thesis.json 을 불러오지 못했습니다 (' + esc(String(TDerr.message||TDerr)) + '). ' +
+    '파일을 직접 열었다면(file://) 브라우저가 fetch 를 막습니다 — GitHub Pages 주소로 열어 주세요.</p></div></section>';
+  if(!TD){ loadTD(); return '<section class="panel"><div class="panel-hd"><h2>데이터</h2></div><div class="panel-bd"><p class="empty">논문 패널을 불러오는 중…</p></div></section>'; }
+  var M = TD.meta, Y = M.years, lastY = String(Y[Y.length-1]);
+  var h = "";
+  h += '<section class="stats">' +
+    tile("대학", M.schools + "", "2015~" + lastY + " 불균형 패널", "accv") +
+    tile("관측치", nf(M.obs), "대학-연도", "") +
+    tile("변수", M.vars + "", M.sources + "개 출처 블록 + 파생", "") +
+    tile("핵심 모형 완결", nf(M.complete_core), "투입 3 · 산출 4 · 2015~2024", "accv", M.complete_core/M.obs*100, false) +
+    tile("갱신", M.built.slice(5).replace("-","."), M.built.slice(0,4) + " · 확장 패널 결합", "") +
+    '</section>';
+
+  /* 출처 · 커버리지 */
+  h += '<section class="panel lift"><div class="panel-hd"><h2>자료 출처와 연도별 커버리지</h2>' +
+    '<p class="hint">칸 하나 = 1년(' + Y[0] + '→' + lastY + ') · 진할수록 패널 대학 대비 확보 비율↑</p></div><div class="panel-bd">' +
+    '<div class="tablewrap"><table class="dt"><thead><tr><th>출처</th><th>기관</th><th>기간</th><th class="n">변수</th><th>상태</th><th>커버리지</th><th>비고</th></tr></thead><tbody>';
+  TD.sources.forEach(function(sc){
+    var cells = Y.map(function(y){ var v = sc.coverage[String(y)], mx = M.panel_n[String(y)];
+      return '<i data-q="' + q5(v, mx) + '" title="' + y + ': ' + v + '/' + mx + '교"></i>'; }).join("");
+    h += '<tr><td class="k">' + esc(sc.name) + '</td><td class="dim">' + esc(sc.org) + '</td><td class="dim">' + esc(sc.period) + '</td>' +
+      '<td class="n">' + sc.vars + '</td><td>' + pill(sc.status) + '</td><td><span class="heat">' + cells + '</span></td><td class="dim">' + esc(sc.note) + '</td></tr>';
+  });
+  h += '</tbody></table></div></div></section>';
+
+  h += '<div class="dgrid">';
+  /* 데이터 관리 체크리스트 */
+  var dn = 0; DATA_TODOS.forEach(function(t){ if(state.data.todo[t.k]) dn++; });
+  h += '<section class="panel"><div class="panel-hd"><h2>데이터 할 일</h2><p class="hint">' + dn + '/' + DATA_TODOS.length + ' 완료 · 이 브라우저에 저장</p></div>' +
+    '<div class="panel-bd" style="display:flex;flex-direction:column;gap:12px"><div class="tasklist">';
+  DATA_TODOS.forEach(function(t){
+    h += '<label class="task' + (state.data.todo[t.k]?" on":"") + '"><input class="ck" type="checkbox" data-dt="' + t.k + '"' + (state.data.todo[t.k]?" checked":"") + '><span>' + esc(t.t) + '</span></label>';
+  });
+  h += '</div><div class="field"><label for="dNote">데이터 메모</label><textarea id="dNote" maxlength="2000" placeholder="변수 결정, 지도교수 코멘트, 재수집 메모">' + esc(state.data.note||"") + '</textarea></div></div></section>';
+
+  /* 정제 · 링크 */
+  var C = TD.cleaning, cp = TD.composition;
+  h += '<section class="panel"><div class="panel-hd"><h2>정제와 구성</h2><p class="hint">정제 로그 ' + nf(C['평가원'].n + C['확장'].n) + '건</p></div><div class="panel-bd" style="display:flex;flex-direction:column;gap:12px">';
+  h += '<div class="tablewrap"><table class="dt"><thead><tr><th>로그</th><th>사유</th><th class="n">건수</th></tr></thead><tbody>';
+  [["평가원", C['평가원']], ["확장", C['확장']]].forEach(function(p){ p[1].by.slice(0,6).forEach(function(b, i){
+    h += '<tr>' + (i===0 ? '<td class="k" rowspan="' + Math.min(6, p[1].by.length) + '">' + p[0] + ' (' + nf(p[1].n) + ')</td>' : '') + '<td class="dim">' + esc(b.reason) + '</td><td class="n">' + nf(b.n) + '</td></tr>'; }); });
+  h += '</tbody></table></div>';
+  h += '<p class="dnote">설립: ' + Object.keys(cp['설립']).map(function(k){ return k + ' ' + cp['설립'][k] + '교'; }).join(' · ') +
+       '<br>권역: ' + Object.keys(cp['권역']).map(function(k){ return k + ' ' + cp['권역'][k] + '교'; }).join(' · ') +
+       '<br>원자료·스크립트·정제 로그: <a href="' + M.repo + '" target="_blank" rel="noopener">비공개 논문 저장소</a> · 평가원 패널 대시보드: <a href="' + M.dashboard + '" target="_blank" rel="noopener">univ-panel-dashboard</a></p>';
+  h += '</div></section>';
+  h += '</div>';
+
+  /* DEA 변수 */
+  var dv = TD.dea;
+  h += '<section class="panel lift"><div class="panel-hd"><h2>자료포락분석 변수</h2><p class="hint">핵심 = 투입 3 · 산출 4, 확장 = +정부재정지원 · 특허 · 2015~2025 전체 관측치 기준</p></div><div class="panel-bd" style="display:flex;flex-direction:column;gap:14px">';
+  h += '<div class="tablewrap"><table class="dt"><thead><tr><th>변수</th><th>역할</th><th>출처</th><th>단위</th><th class="n">N</th><th class="n">평균</th><th class="n">중앙값</th><th class="n">최대</th><th class="n">0값</th></tr></thead><tbody>';
+  dv.vars.forEach(function(v){ var nd = (v.unit === "억원" && v.med < 100) ? 1 : 0;
+    h += '<tr><td class="k">' + esc(v.name) + '</td><td>' + pill(v.role.indexOf("확장")>=0 ? "부분:확장" : "확보:" + v.role).replace("부분:","").replace("확보:","") + '</td><td class="dim">' + esc(v.source) + '</td><td class="dim">' + v.unit + '</td>' +
+      '<td class="n">' + nf(v.n) + '</td><td class="n">' + nf(v.mean, nd) + '</td><td class="n">' + nf(v.med, nd) + '</td><td class="n">' + nf(v.max, 0) + '</td><td class="n">' + nf(v.zeros) + '</td></tr>'; });
+  h += '</tbody></table></div>';
+  h += '<div class="chartwrap" id="dmuwrap">' + dmuChart() + '<div class="tip" id="dtip" hidden></div></div>' +
+       '<div class="chartlegend"><span><i style="background:var(--accent)"></i>핵심 모형 완결 대학</span><span><i style="background:var(--accent-soft);border:1.2px solid var(--accent)"></i>확장 모형 완결</span><span><i style="background:var(--surface-3)"></i>패널 대학</span></div>';
+  h += '<div style="overflow-x:auto"><p class="sechd" style="margin-bottom:6px">투입·산출 상관 (Pearson)</p>' + corrTable() + '</div>';
+  h += '</div></section>';
+
+  /* 시도 지도 */
+  h += '<section class="panel"><div class="panel-hd"><h2>시도별 현황</h2>' +
+    '<div class="dsel"><select data-dsel="ind">' + Object.keys(TD.sidoUnits).map(function(k){ return '<option' + (k===DSEL.ind?" selected":"") + '>' + k + '</option>'; }).join("") + '</select>' +
+    '<select data-dsel="year">' + Y.map(function(y){ return '<option' + (String(y)===DSEL.year?" selected":"") + '>' + y + '</option>'; }).join("") + '</select></div></div>' +
+    '<div class="panel-bd"><div class="maplay"><div class="kmap">' + sidoMap() + '</div><div class="rank">' + sidoRank() + '</div></div>' +
+    '<p class="dnote" style="margin-top:10px">대학 소재 시도 기준 합계·평균. 인구·GRDP·고3은 통계청 시도 통계, 입학자원 압력 = 시도 18세 인구 ÷ 시도 내 4년제 입학정원.</p></div></section>';
+
+  /* 학교별 탐색 */
+  h += '<section class="panel"><div class="panel-hd"><h2>학교별 탐색</h2>' +
+    '<div class="dsel"><input list="schoolList" id="schoolIn" placeholder="학교명 입력 · 선택" value="' + esc(DSEL.school||"") + '">' +
+    '<datalist id="schoolList">' + TD.schools.map(function(x){ return '<option value="' + esc(x.name) + '">'; }).join("") + '</datalist></div></div>' +
+    '<div class="panel-bd">' + schoolTable() + '</div></section>';
+  return h;
+}
+function dmuChart(){
+  var Y = TD.meta.years, W = 720, H = 200, ml = 36, mr = 8, mt = 14, mb = 26, pw = W-ml-mr, ph = H-mt-mb;
+  var max = 0; Y.forEach(function(y){ max = Math.max(max, TD.meta.panel_n[String(y)]); }); max = Math.ceil(max/50)*50;
+  var y = function(v){ return mt + ph - v/max*ph; }, gw = pw/Y.length, bw = Math.max(5, (gw-10)/2);
+  var s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="연도별 패널 대학 수와 핵심·확장 모형 완결 대학 수">';
+  for(var t=0;t<=max;t+=50){ s += '<line x1="' + ml + '" y1="' + y(t) + '" x2="' + (W-mr) + '" y2="' + y(t) + '" stroke="var(--grid)"/>' +
+    '<text x="' + (ml-6) + '" y="' + (y(t)+3.5) + '" text-anchor="end">' + t + '</text>'; }
+  Y.forEach(function(yr, i){
+    var k = String(yr), pn = TD.meta.panel_n[k], c = TD.dea.complete[k];
+    var x0 = ml + i*gw + 4;
+    s += '<rect x="' + x0 + '" y="' + y(pn) + '" width="' + (gw-8) + '" height="' + (ph-(y(pn)-mt)) + '" fill="var(--surface-3)" rx="3"/>';
+    s += '<rect x="' + (x0+1) + '" y="' + y(c.core) + '" width="' + bw + '" height="' + Math.max(0, ph-(y(c.core)-mt)) + '" fill="var(--accent)" rx="3"/>';
+    s += '<rect x="' + (x0+bw+3) + '" y="' + y(c.ext) + '" width="' + bw + '" height="' + Math.max(0, ph-(y(c.ext)-mt)) + '" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.2" rx="3"/>';
+    s += '<rect class="hit" data-y="' + k + '" x="' + (ml+i*gw) + '" y="' + mt + '" width="' + gw + '" height="' + ph + '" fill="transparent"/>';
+    s += '<text x="' + (ml+i*gw+gw/2) + '" y="' + (H-8) + '" text-anchor="middle">' + String(yr).slice(2) + '</text>';
+  });
+  s += '<line x1="' + ml + '" y1="' + y(0) + '" x2="' + (W-mr) + '" y2="' + y(0) + '" stroke="var(--line-strong)"/></svg>';
+  return s;
+}
+function corrTable(){
+  var C = TD.dea.corr, sh = function(n){ return n.replace("_경상제외","(경상제외)").replace("수입료","").replace("논문수","논문"); };
+  var h = '<table class="corr"><tr><th></th>' + C.vars.map(function(v){ return '<th title="' + esc(v) + '">' + esc(sh(v).slice(0,5)) + '</th>'; }).join("") + '</tr>';
+  C.m.forEach(function(row, i){
+    h += '<tr><th class="rh">' + esc(sh(C.vars[i])) + '</th>' + row.map(function(r, j){
+      if(i === j) return '<td class="diag">1</td>';
+      var a = Math.abs(r||0), q = a >= .9 ? 5 : a >= .8 ? 4 : a >= .6 ? 3 : a >= .4 ? 2 : 1;
+      return '<td data-q="' + q + '" title="' + esc(C.vars[i]) + ' × ' + esc(C.vars[j]) + ' = ' + r + '">' + (r===null?"—":(r+"").replace(/^0\./,".").replace(/^-0\./,"-.")) + '</td>'; }).join("") + '</tr>';
+  });
+  return h + '</table>';
+}
+function sidoVals(){ var out = []; Object.keys(TD.sido).forEach(function(rg){ var v = (TD.sido[rg][DSEL.year]||{})[DSEL.ind]; out.push({rg:rg, v:(v===undefined?null:v)}); }); return out; }
+function sidoMap(){
+  var vals = sidoVals(), mx = null; vals.forEach(function(o){ if(o.v !== null && (mx === null || o.v > mx)) mx = o.v; });
+  var vm = {}; vals.forEach(function(o){ vm[o.rg] = o.v; });
+  var sorted = vals.filter(function(o){ return o.v !== null; }).map(function(o){ return o.v; }).sort(function(a,b){ return a-b; });
+  var qv = function(v){ if(v === null || !sorted.length) return 0; var r = sorted.filter(function(x){ return x <= v; }).length / sorted.length; return r >= .8 ? 5 : r >= .6 ? 4 : r >= .4 ? 3 : r >= .2 ? 2 : 1; };
+  var g = TD.geo, s = '<svg viewBox="' + g.viewBox + '" role="img" aria-label="시도별 ' + esc(DSEL.ind) + ' ' + DSEL.year + '">';
+  g.regions.forEach(function(r){ var v = vm[r.name]; s += '<path class="rg' + (DSEL.region===r.name?" sel":"") + '" data-rg="' + esc(r.name) + '" data-q="' + qv(v===undefined?null:v) + '" d="' + r.d + '"><title>' + esc(r.name) + ' · ' + esc(DSEL.ind) + ' ' + nf(v, DSEL.ind==="입학자원압력"?2:(DSEL.ind==="취업률"||DSEL.ind==="전임교원1인당학생"?1:0)) + ' ' + esc(TD.sidoUnits[DSEL.ind]) + '</title></path>'; });
+  g.regions.forEach(function(r){ s += '<text x="' + r.cx + '" y="' + r.cy + '">' + esc(r.name) + '</text>'; });
+  return s + '</svg>';
+}
+function sidoRank(){
+  var vals = sidoVals().filter(function(o){ return o.v !== null; }).sort(function(a,b){ return b.v-a.v; });
+  var mx = vals.length ? vals[0].v : 1, nd = DSEL.ind==="입학자원압력"?2:(DSEL.ind==="취업률"||DSEL.ind==="전임교원1인당학생"?1:0);
+  var h = '<p class="sechd" style="margin-bottom:4px">' + esc(DSEL.ind) + ' · ' + DSEL.year + ' (' + esc(TD.sidoUnits[DSEL.ind]) + ')</p>';
+  vals.forEach(function(o){ h += '<div class="rr' + (DSEL.region===o.rg?" sel":"") + '" data-rg="' + esc(o.rg) + '"><span>' + esc(o.rg) + '</span><span class="rb"><i style="width:' + (mx? o.v/mx*100 : 0) + '%"></i></span><span class="rv">' + nf(o.v, nd) + '</span></div>'; });
+  if(!vals.length) h += '<p class="empty">이 연도에는 값이 없습니다</p>';
+  return h;
+}
+function schoolTable(){
+  var sc = null; TD.schools.forEach(function(x){ if(x.name === DSEL.school) sc = x; });
+  if(!sc) return '<p class="empty">학교를 선택하면 연도별 주요 변수를 표로 보여줍니다. 예: 부산대학교, 경상국립대학교</p>';
+  var KEYS = ["재학생","전임교원","직원","총교육비","정부지원","취업률","취업자","SCI논문","교외연구비","기술이전","특허등록","평균등록금","중도탈락률","신입생충원율","전임교원확보율"];
+  var ys = Object.keys(sc.years).sort();
+  var h = '<div class="schoolhd"><b>' + esc(sc.name) + '</b><span class="tag">' + esc(sc.type) + '</span><span class="tag">' + esc(sc.region) + '</span>' + (sc.flags['거점']?'<span class="tag adv">지역거점</span>':'') + '</div>';
+  h += '<div class="tablewrap"><table class="dt"><thead><tr><th>변수</th>' + ys.map(function(y){ return '<th class="n">' + y.slice(2) + '</th>'; }).join("") + '</tr></thead><tbody>';
+  KEYS.forEach(function(k){ var u = TD.schoolUnits[k]; var nd = (u === "%" || (u === "억원")) ? 1 : 0;
+    h += '<tr><td class="k">' + k + ' <span class="dim">' + u + '</span></td>' + ys.map(function(y){ var v = sc.years[y][k]; return '<td class="n">' + (v===undefined?"—":nf(v, nd)) + '</td>'; }).join("") + '</tr>'; });
+  h += '<tr><td class="k">재정지원 제한</td>' + ys.map(function(y){ var v = sc.years[y]['재정지원제한']; return '<td class="n">' + (v===undefined?"—":(v?'<span class="pill part">제한</span>':'<span class="dim">—</span>')) + '</td>'; }).join("") + '</tr>';
+  h += '<tr><td class="k">사업 참여</td>' + ys.map(function(y){ var p = sc.years[y]['사업']; return '<td class="dim" style="white-space:normal;min-width:64px">' + (p? p.join(" ") : "—") + '</td>'; }).join("") + '</tr>';
+  return h + '</tbody></table></div>';
+}
+function wireData(root){
+  each(root, "input[data-dt]", "change", function(e){ state.data.todo[e.target.dataset.dt] = e.target.checked ? 1 : 0;
+    e.target.parentNode.classList.toggle("on", e.target.checked); save();
+    var hd = e.target.closest(".panel").querySelector(".hint"); var dn = 0; DATA_TODOS.forEach(function(t){ if(state.data.todo[t.k]) dn++; }); if(hd) hd.textContent = dn + "/" + DATA_TODOS.length + " 완료 · 이 브라우저에 저장"; });
+  var dn = document.getElementById("dNote"); if(dn) dn.addEventListener("input", function(){ state.data.note = dn.value; save(); });
+  each(root, "select[data-dsel]", "change", function(e){ DSEL[e.target.dataset.dsel] = e.target.value;
+    if(e.target.dataset.dsel === "ind" && !sidoVals().some(function(o){ return o.v !== null; })){ DSEL.year = lastYearWith(TD, DSEL.ind); var ys = root.querySelector('select[data-dsel="year"]'); if(ys) ys.value = DSEL.year; }
+    redrawSido(root); });
+  each(root, ".kmap path.rg, .rank .rr", "click", function(e){ DSEL.region = (DSEL.region === e.currentTarget.dataset.rg) ? null : e.currentTarget.dataset.rg; redrawSido(root); });
+  var si = document.getElementById("schoolIn"); if(si) si.addEventListener("change", function(){ DSEL.school = si.value; var pb = si.closest(".panel").querySelector(".panel-bd"); if(pb) pb.innerHTML = schoolTable(); });
+  var cw = document.getElementById("dmuwrap");
+  if(cw){ var tip = document.getElementById("dtip");
+    each(cw, ".hit", "mouseenter", function(e){ var r = e.currentTarget, k = r.dataset.y, c = TD.dea.complete[k];
+      var box = cw.getBoundingClientRect(), rb = r.getBoundingClientRect();
+      tip.innerHTML = k + " · 패널 " + TD.meta.panel_n[k] + "교 · 핵심 <b>" + c.core + "</b> · 확장 " + c.ext;
+      tip.style.left = (rb.left - box.left + rb.width/2) + "px"; tip.style.top = (rb.top - box.top + 24) + "px"; tip.hidden = false; });
+    cw.addEventListener("mouseleave", function(){ tip.hidden = true; }); }
+}
+function redrawSido(root){
+  var km = root.querySelector(".kmap"), rk = root.querySelector(".rank");
+  if(km) km.innerHTML = sidoMap(); if(rk) rk.innerHTML = sidoRank();
+  each(root, ".kmap path.rg, .rank .rr", "click", function(e){ DSEL.region = (DSEL.region === e.currentTarget.dataset.rg) ? null : e.currentTarget.dataset.rg; redrawSido(root); });
+}
 /* ===================== 조각 ===================== */
 function tile(lab, val, note, cls, mp, warnM){
   var m = (mp === undefined) ? "" :
@@ -907,6 +1156,7 @@ function wire(){
     go("today", false);
   });
   each(root, "[data-act]", "click", function(e){ act(e.currentTarget.dataset.act); });
+  wireData(root);
 
   var fi = document.getElementById("fileIn");
   if(fi) fi.addEventListener("change", function(){
