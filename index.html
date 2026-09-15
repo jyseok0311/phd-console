@@ -7,9 +7,8 @@
 <meta name="description" content="공공정책학 박사 프로포절 36주 실행 콘솔 — 주차별 과제, 투입 시간, 매달 규율을 한 곳에서 추적합니다.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23146B63'/%3E%3Ctext x='16' y='22' font-size='16' font-family='Georgia,serif' fill='%23fff' text-anchor='middle'%3E%E5%8D%9A%3C/text%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <script>
 /* 화면 테마: 기본은 밝게. 운영체제 다크 모드를 자동으로 따르지 않고, 상단 바 버튼으로만 바꾼다 */
 (function(){ var t = "light"; try{ t = localStorage.getItem("phd-console-theme") || "light"; }catch(e){}
@@ -26,9 +25,9 @@
   --shadow:0 1px 2px rgba(18,27,25,.05), 0 14px 32px -22px rgba(18,27,25,.35);
   --shadow-lift:0 1px 2px rgba(18,27,25,.06), 0 22px 48px -28px rgba(18,27,25,.45);
   --r-s:7px; --r-m:11px; --r-l:18px;
-  --f-display:"Hahmlet",'Nanum Myeongjo',Georgia,serif;
-  --f-body:"IBM Plex Sans KR",'Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;
-  --f-mono:"IBM Plex Mono",'D2Coding',ui-monospace,SFMono-Regular,Consolas,monospace;
+  --f-display:"Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+  --f-body:"Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+  --f-mono:"Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
   --t-hero:clamp(30px,5.2vw,40px); --t-xl:21px; --t-l:16.5px; --t-m:14px;
   --t-s:12.5px; --t-xs:11.5px; --t-lab:10.5px;
   --rail:216px;
@@ -58,9 +57,9 @@
 
 *{box-sizing:border-box}
 html,body{margin:0; padding:0}
-body{background:var(--ground); color:var(--ink); font-family:var(--f-body); font-size:var(--t-m); line-height:1.6;
+body{background:var(--ground); color:var(--ink); font-family:var(--f-body); font-size:var(--t-m); line-height:1.6; font-variant-numeric:tabular-nums;
   -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
-h1,h2,h3{margin:0; text-wrap:balance; font-family:var(--f-display); font-weight:600; letter-spacing:-.015em}
+h1,h2,h3{margin:0; text-wrap:balance; font-family:var(--f-display); font-weight:700; letter-spacing:-.02em}
 p{margin:0}
 .eyebrow{font-size:var(--t-lab); font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3)}
 button{font:inherit; color:inherit; background:none; border:none; cursor:pointer}
