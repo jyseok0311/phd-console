@@ -388,6 +388,50 @@ table.dt td.dim{color:var(--ink-3); font-size:11.5px}
 .themebtn:hover{background:var(--surface-2); color:var(--ink)}
 .themebtn svg{width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
 .appbar .right{display:flex; align-items:center; gap:12px}
+
+/* ============ 목차 · 문헌 ============ */
+.toc{display:flex; flex-direction:column; gap:2px}
+.tocrow{display:grid; grid-template-columns:54px minmax(0,1fr) 120px 74px 48px; gap:10px; align-items:center; padding:7px 10px; border-radius:var(--r-s)}
+.tocrow:hover{background:var(--surface-2)}
+.tocrow.l1{margin-top:10px; border-top:1px solid var(--line); padding-top:12px; border-radius:0}
+.tocrow.l1 .tt{font-family:var(--f-display); font-weight:700; font-size:14.5px}
+.tocrow.l2 .tt{font-weight:600}
+.tocrow.l3{padding-left:28px} .tocrow.l3 .tt{color:var(--ink-2)}
+.tocrow .tn{font-family:var(--f-mono); font-size:11.5px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.tocrow .tt{font-size:13px; min-width:0} .tocrow .tt small{display:block; font-size:11px; color:var(--ink-3); font-weight:400}
+.tocrow .tt a{font-size:11px; margin-left:6px}
+.tocrow select, .tocrow input{font:inherit; font-size:11.5px; color:var(--ink); background:var(--ground); border:1px solid var(--line); border-radius:var(--r-s); padding:4px 6px; width:100%}
+.tocrow input[type=number]{max-width:none; text-align:right; font-variant-numeric:tabular-nums}
+.tocrow .pg{font-family:var(--f-mono); font-size:11px; color:var(--ink-3); text-align:right}
+.st-0{color:var(--ink-3)} .st-1{color:var(--ink-2)} .st-2{color:var(--accent)} .st-3{color:var(--warn)} .st-4{color:var(--accent-ink); font-weight:600}
+.tocnote{grid-column:2 / -1; margin:-2px 0 4px}
+.tocnote input{width:100%; font:inherit; font-size:11.5px; color:var(--ink-2); background:transparent; border:none; border-bottom:1px dashed var(--line); padding:2px 0}
+.tocnote input:focus{outline:none; border-bottom-color:var(--accent)}
+@media (max-width:700px){ .tocrow{grid-template-columns:44px minmax(0,1fr) 92px} .tocrow input[type=number], .tocrow .pg{display:none} }
+
+.reftools{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.reftools input[type=search], .reftools select{font:inherit; font-size:12.5px; color:var(--ink); background:var(--ground); border:1px solid var(--line); border-radius:var(--r-s); padding:6px 9px}
+.reftools input[type=search]{min-width:200px; flex:1}
+.reflist{display:flex; flex-direction:column; gap:1px}
+.ref{display:grid; grid-template-columns:minmax(0,1fr) 128px; gap:8px 14px; padding:10px 10px; border-radius:var(--r-s); border-bottom:1px solid var(--line-soft)}
+.ref:hover{background:var(--surface-2)}
+.ref .rt{font-size:13px; font-weight:600; line-height:1.45}
+.ref .rt a{color:inherit; text-decoration:none} .ref .rt a:hover{text-decoration:underline}
+.ref .rm{font-size:11.5px; color:var(--ink-2); margin-top:2px} .ref .rm b{color:var(--ink); font-weight:500}
+.ref .rtags{display:flex; gap:4px; flex-wrap:wrap; margin-top:5px}
+.ref .rtags .tag{cursor:pointer}
+.ref .rside{display:flex; flex-direction:column; gap:5px}
+.ref .rside select, .ref .rside input{font:inherit; font-size:11px; color:var(--ink); background:var(--ground); border:1px solid var(--line); border-radius:var(--r-s); padding:3px 5px; width:100%}
+.ref .rside .del{font-size:10.5px; color:var(--ink-3); text-align:right}
+.ref .rside .del:hover{color:var(--warn)}
+.ref .rab{font-size:11.5px; color:var(--ink-3); margin-top:5px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.ref.open .rab{display:block}
+.ref .memo{margin-top:6px} .ref .memo textarea{min-height:34px; font-size:12px}
+@media (max-width:640px){ .ref{grid-template-columns:1fr} }
+.addform{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px}
+.addform .field.wide{grid-column:1 / -1}
+.addform input[type=text], .addform input[type=url]{font:inherit; font-size:13px; color:var(--ink); background:var(--ground); border:1px solid var(--line); border-radius:var(--r-s); padding:7px 9px; width:100%}
+.cnts{font-family:var(--f-mono); font-size:11px; color:var(--ink-3)}
 .foot{font-size:11px; color:var(--ink-3); line-height:1.6}
 @media (prefers-reduced-motion: reduce){*{transition:none !important; animation:none !important}}
 </style>
@@ -402,6 +446,8 @@ table.dt td.dim{color:var(--ink-3); font-size:11.5px}
     <button class="navb" data-go="log"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>기록</span><span class="cnt" id="cntLog"></span></button>
     <button class="navb" data-go="ref"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5A2.5 2.5 0 0 1 4 20.5z"/></svg><span>참조</span></button>
     <button class="navb" data-go="data"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="2.5"/><path d="M4 5.5v13c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5v-13"/><path d="M4 12c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5"/></svg><span>데이터</span><span class="cnt" id="cntData"></span></button>
+    <button class="navb" data-go="toc"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg><span>목차</span><span class="cnt" id="cntToc"></span></button>
+    <button class="navb" data-go="refs"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h5"/></svg><span>문헌</span><span class="cnt" id="cntRefs"></span></button>
     <div class="railfoot">
       <div class="railprog">
         <span class="pl"><span id="rpL">36주 진행</span><span id="rpR"></span></span>
@@ -528,7 +574,7 @@ var NOWW = BEFORE ? 1 : (AFTER ? 36 : CURW);
 
 /* ===================== 상태 ===================== */
 var LS = "phd-console-v1";
-var state = { w:{}, m:{}, hab:{}, pre:{}, data:{todo:{}, note:""} };
+var state = { w:{}, m:{}, hab:{}, pre:{}, data:{todo:{}, note:""}, toc:{st:{}, pg:{}, note:{}}, refs:{items:[], st:{}, cite:{}, memo:{}, hide:{}, edit:{}} };
 var selW = NOWW, habM = monthKey(TODAY), screen = "today";
 
 function wk(i){
@@ -543,8 +589,10 @@ function load(){
 }
 function apply(d){
   if(!d || typeof d !== "object") return;
-  ["w","m","hab","pre","data"].forEach(function(k){ if(d[k] && typeof d[k] === "object") state[k] = d[k]; });
+  ["w","m","hab","pre","data","toc","refs"].forEach(function(k){ if(d[k] && typeof d[k] === "object") state[k] = d[k]; });
   if(!state.data.todo) state.data.todo = {};
+  ["st","pg","note"].forEach(function(k){ if(!state.toc[k]) state.toc[k] = {}; });
+  ["st","cite","memo","hide","edit"].forEach(function(k){ if(!state.refs[k]) state.refs[k] = {}; }); if(!Array.isArray(state.refs.items)) state.refs.items = [];
 }
 var saveT = null;
 function save(){
@@ -585,7 +633,9 @@ var SCREENS = {
   board:{title:"보드", render:scBoard},
   log:  {title:"기록", render:scLog},
   ref:  {title:"참조", render:scRef},
-  data: {title:"데이터", render:scData}
+  data: {title:"데이터", render:scData},
+  toc:  {title:"논문 목차", render:scToc},
+  refs: {title:"문헌", render:scRefs}
 };
 function go(name, push){
   if(!SCREENS[name]) name = "today";
@@ -609,6 +659,8 @@ function meta(){
   document.getElementById("cntBoard").textContent = T.td + "/" + T.tt;
   document.getElementById("cntLog").textContent = T.hrs ? T.hrs.toFixed(0) + "h" : "";
   var cd = document.getElementById("cntData"); if(cd) cd.textContent = TD ? TD.meta.vars + "열" : "";
+  var ct = document.getElementById("cntToc"); if(ct){ var T2 = tocTotals(); ct.textContent = T2.done + "/" + T2.n; }
+  var cr = document.getElementById("cntRefs"); if(cr) cr.textContent = allRefs().length ? allRefs().length + "편" : "";
   document.getElementById("rpR").textContent = "W" + pad(NOWW) + " · " + T.pct + "%";
   document.getElementById("rpBar").style.width = (NOWW/36*100) + "%";
 }
@@ -1063,6 +1115,253 @@ function redrawSido(root){
   if(km) km.innerHTML = sidoMap(); if(rk) rk.innerHTML = sidoRank();
   each(root, ".kmap path.rg, .rank .rr", "click", function(e){ DSEL.region = (DSEL.region === e.currentTarget.dataset.rg) ? null : e.currentTarget.dataset.rg; redrawSido(root); });
 }
+
+/* ===================== 화면: 논문 목차 ===================== */
+/* 골격 문서(박사학위논문_골격_석재영_v1.0.hwp)의 1~5장 개요. l = 수준, w = 계획 주차(WEEKS), doc = 작성 문서 */
+var TOC = [
+ {id:"1",     l:1, t:"서론", w:21},
+ {id:"1.1",   l:2, t:"연구의 배경 및 필요성", w:21, tp:4},
+ {id:"1.2",   l:2, t:"연구 목적 및 연구문제", w:21, tp:2},
+ {id:"1.3",   l:2, t:"연구 범위 및 방법", w:22, tp:2},
+ {id:"1.4",   l:2, t:"논문의 구성", w:22, tp:1},
+ {id:"2",     l:1, t:"이론적 배경 및 선행연구", w:11},
+ {id:"2.1",   l:2, t:"대학 성과평가와 효율성의 개념", w:11, tp:6},
+ {id:"2.1.1", l:3, t:"고등교육의 공공성과 경쟁성", w:11},
+ {id:"2.1.2", l:3, t:"대학기관평가인증과 대학현황지표", w:11},
+ {id:"2.2",   l:2, t:"효율성 측정 방법론", w:12, tp:8},
+ {id:"2.2.1", l:3, t:"자료포락분석(DEA): CCR·BCC 모형과 규모효율성", w:12},
+ {id:"2.2.2", l:3, t:"맘퀴스트 생산성지수", w:12},
+ {id:"2.2.3", l:3, t:"효율성 결정요인 분석: Tobit 및 부트스트랩 절단회귀", w:12},
+ {id:"2.3",   l:2, t:"대학 효율성에 관한 선행연구", w:8, tp:8},
+ {id:"2.3.1", l:3, t:"국내 연구", w:8},
+ {id:"2.3.2", l:3, t:"국외 연구", w:9},
+ {id:"2.4",   l:2, t:"선행연구의 한계와 본 연구의 차별성", w:13, tp:2},
+ {id:"3",     l:1, t:"연구 설계", w:17},
+ {id:"3.1",   l:2, t:"분석 자료 및 표본", w:17, tp:12, doc:"박사학위논문_3장1절_분석자료_석재영_v1.2.hwp", st0:2},
+ {id:"3.1.1", l:3, t:"자료 출처: 한국대학평가원 대학현황지표(2015~2025)", w:17, st0:2},
+ {id:"3.1.2", l:3, t:"2주기·3주기 자료의 결합과 정합성 검증", w:17, st0:2},
+ {id:"3.1.3", l:3, t:"표본 정제 및 관측치 구성", w:17, st0:2},
+ {id:"3.1.4", l:3, t:"보완 자료의 수집·결합 (대학알리미·KESS·재정알리미·KERIS 등)", w:19, st0:2},
+ {id:"3.2",   l:2, t:"변수의 정의", w:17, tp:5},
+ {id:"3.2.1", l:3, t:"투입변수와 산출변수 (핵심 3×4 · 확장 4×5)", w:17, st0:1},
+ {id:"3.2.2", l:3, t:"집단 구분 및 환경변수", w:17, st0:1},
+ {id:"3.3",   l:2, t:"분석 모형", w:18, tp:6},
+ {id:"3.3.1", l:3, t:"1단계: DEA(CCR·BCC) 및 규모효율성", w:18},
+ {id:"3.3.2", l:3, t:"2단계: 맘퀴스트 생산성지수 분해", w:18},
+ {id:"3.3.3", l:3, t:"3단계: 효율성 결정요인 회귀(Tobit·Simar-Wilson)", w:18},
+ {id:"3.4",   l:2, t:"연구가설", w:19, tp:2},
+ {id:"4",     l:1, t:"실증분석 결과", w:27},
+ {id:"4.1",   l:2, t:"기술통계 및 상관분석", w:27, tp:5},
+ {id:"4.2",   l:2, t:"대학 효율성 분석 결과", w:27, tp:12},
+ {id:"4.2.1", l:3, t:"기술효율성·순수기술효율성·규모효율성", w:27},
+ {id:"4.2.2", l:3, t:"설립유형·지역거점 여부별 효율성 비교", w:27},
+ {id:"4.3",   l:2, t:"생산성 변화 분석: 2015~2025", w:27, tp:8},
+ {id:"4.4",   l:2, t:"효율성 결정요인 분석", w:27, tp:10},
+ {id:"4.5",   l:2, t:"강건성 검정", w:27, tp:5},
+ {id:"5",     l:1, t:"결론 및 정책적 시사점", w:28},
+ {id:"5.1",   l:2, t:"연구 결과 요약", w:28, tp:3},
+ {id:"5.2",   l:2, t:"정책적 시사점", w:28, tp:4},
+ {id:"5.3",   l:2, t:"연구의 한계와 향후 과제", w:28, tp:2}
+];
+var TOC_ST = ["미착수", "자료·구상", "초안", "수정 중", "완료"];
+var DOCS_URL = "https://github.com/jyseok0311/phd-thesis-university-efficiency/tree/main/%EC%B5%9C%EC%A2%85%20%EA%B2%B0%EA%B3%BC%EB%AC%BC/%ED%95%9C%EA%B8%80%EB%AC%B8%EC%84%9C";
+function tocSt(id){ var n = TOC.filter(function(x){ return x.id === id; })[0]; var v = state.toc.st[id]; return (v === undefined || v === null) ? (n && n.st0 || 0) : +v; }
+function tocTotals(){
+  var leaf = TOC.filter(function(x){ return x.l >= 2 && !TOC.some(function(y){ return y.l === 3 && y.id.indexOf(x.id + ".") === 0; }); });
+  var done = 0, draft = 0, tp = 0, pg = 0;
+  TOC.forEach(function(x){ if(x.l === 2){ tp += x.tp || 0; pg += +state.toc.pg[x.id] || 0; } });
+  leaf.forEach(function(x){ var st = tocSt(x.id); if(st >= 4) done++; if(st >= 2) draft++; });
+  return {n: leaf.length, done: done, draft: draft, tp: tp, pg: pg};
+}
+function scToc(){
+  var T = tocTotals();
+  var h = '<section class="stats">' +
+    tile("완료 절", T.done + "", T.n + "개 절·항 중", "accv", T.n ? T.done/T.n*100 : 0, false) +
+    tile("초안 이상", T.draft + "", "완료 포함", T.draft ? "accv" : "", T.n ? T.draft/T.n*100 : 0, false) +
+    tile("작성 쪽수", T.pg + "", "목표 " + T.tp + "쪽", T.pg >= T.tp ? "accv" : "", T.tp ? T.pg/T.tp*100 : 0, T.tp && T.pg < T.tp*0.5) +
+    tile("이번 주 계획 장", (function(){ var x = TOC.filter(function(y){ return y.l === 2 && y.w === NOWW; })[0]; return x ? x.id : "—"; })(), "36주 계획 기준", "") +
+    '</section>';
+  h += '<section class="panel lift"><div class="panel-hd"><h2>논문 목차와 진행</h2>' +
+    '<p class="hint">절·항마다 상태와 작성 쪽수를 기록 · 이 브라우저에 저장</p>' +
+    '<div class="actions"><button class="abtn" data-act="toc-md">목차 .md 내려받기</button><span class="msg" id="actMsg" role="status"></span></div></div>' +
+    '<div class="panel-bd"><div class="toc">';
+  TOC.forEach(function(x){
+    var st = tocSt(x.id), isLeaf = !(x.l === 1) && !TOC.some(function(y){ return y.l === 3 && y.id.indexOf(x.id + ".") === 0; });
+    var sel = isLeaf ? '<select data-toc-st="' + x.id + '" class="st-' + st + '">' + TOC_ST.map(function(n, i){ return '<option value="' + i + '"' + (i === st ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' :
+      '<span class="cnts">' + (x.l === 1 ? chapterProg(x.id) : "") + '</span>';
+    var pg = x.l === 2 ? '<input type="number" min="0" max="200" step="1" data-toc-pg="' + x.id + '" value="' + (state.toc.pg[x.id] || "") + '" placeholder="쪽">' : '<span></span>';
+    var tp = x.l === 2 && x.tp ? '<span class="pg">/ ' + x.tp + '</span>' : '<span></span>';
+    var wk = x.w ? '<small>W' + pad(x.w) + ' · ' + range(x.w) + (x.doc ? ' · <a href="' + DOCS_URL + '" target="_blank" rel="noopener">' + esc(x.doc.replace('박사학위논문_', '').replace('_석재영', '')) + '</a>' : '') + '</small>' : '';
+    h += '<div class="tocrow l' + x.l + '"><span class="tn">' + x.id + '</span><span class="tt">' + esc(x.t) + wk + '</span>' + sel + pg + tp + '</div>';
+    if(isLeaf) h += '<div class="tocrow" style="padding:0 10px 4px"><span></span><div class="tocnote" style="grid-column:2/-1"><input type="text" data-toc-note="' + x.id + '" maxlength="300" value="' + esc(state.toc.note[x.id] || "") + '" placeholder="메모 · 남은 일"></div></div>';
+  });
+  h += '</div></div></section>';
+  h += '<section class="panel"><div class="panel-hd"><h2>장별 계획</h2><p class="hint">36주 보드의 주차와 연결</p></div><div class="panel-bd"><div class="tablewrap"><table><thead><tr><th>장</th><th>계획 주차</th><th>산출물</th><th>연결 문서</th></tr></thead><tbody>' +
+    [["제2장 이론적 배경·선행연구", "W08~W15", "요약표 30행, 선행연구 지도, 2장 초안", "문헌 화면의 요약·인용 장절"],
+     ["제3장 연구 설계", "W17~W19, W25~W27", "분석틀·변수 정의·절차, 3장 초안", "3장1절 v1.2, 확장 패널, 연구계획 v1.0"],
+     ["제1장 서론", "W21~W22", "1장 완성, 범위·용어 정의", "연구계획 요약"],
+     ["제4장 실증분석", "본논문(2027.7~)", "DEA·맘퀴스트·Tobit 결과", "데이터 화면 핵심 모형"],
+     ["제5장 결론", "본논문", "요약·시사점·한계", "—"]].map(function(r){ return '<tr><td>' + r[0] + '</td><td class="mono">' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td></tr>'; }).join("") +
+    '</tbody></table></div></div></section>';
+  return h;
+}
+function chapterProg(cid){
+  var leaf = TOC.filter(function(x){ return x.id.indexOf(cid + ".") === 0 && !TOC.some(function(y){ return y.l === 3 && y.id.indexOf(x.id + ".") === 0; }); });
+  var d = leaf.filter(function(x){ return tocSt(x.id) >= 4; }).length; return d + "/" + leaf.length;
+}
+function tocMd(){
+  var L = ["# 논문 목차 — 진행 현황 (" + fmt(TODAY, true) + ")", ""];
+  TOC.forEach(function(x){ var ind = x.l === 1 ? "" : (x.l === 2 ? "  " : "    "); var leaf = x.l >= 2 && !TOC.some(function(y){ return y.l === 3 && y.id.indexOf(x.id + ".") === 0; });
+    L.push(ind + "- " + x.id + " " + x.t + (leaf ? " — " + TOC_ST[tocSt(x.id)] : "") + (x.l === 2 && state.toc.pg[x.id] ? " (" + state.toc.pg[x.id] + (x.tp ? "/" + x.tp : "") + "쪽)" : "") + (state.toc.note[x.id] ? " · " + state.toc.note[x.id] : "")); });
+  return L.join("\n");
+}
+function wireToc(root){
+  each(root, "select[data-toc-st]", "change", function(e){ state.toc.st[e.target.dataset.tocSt] = +e.target.value; e.target.className = "st-" + e.target.value; save(); meta();
+    Array.prototype.forEach.call(root.querySelectorAll(".tocrow.l1 .cnts"), function(c){ var id = c.closest(".tocrow").querySelector(".tn").textContent; c.textContent = chapterProg(id); }); });
+  each(root, "input[data-toc-pg]", "input", function(e){ state.toc.pg[e.target.dataset.tocPg] = e.target.value === "" ? null : +e.target.value; save(); });
+  each(root, "input[data-toc-note]", "input", function(e){ state.toc.note[e.target.dataset.tocNote] = e.target.value; save(); });
+}
+
+/* ===================== 화면: 문헌 ===================== */
+/* data/refs.json(초기 문헌: 선행연구 PDF + OpenAlex) + 사용자가 추가·수정한 항목(state.refs). 상태·인용 장절·메모는 id 기준으로 저장 */
+var RF = null, RFerr = null, RFloading = false;
+var RSEL = {q:"", tag:"", st:"", sort:"cited"};
+var REF_ST = ["미읽음", "읽음", "요약 완료", "인용 예정", "제외"];
+function loadRF(){
+  if(RF || RFloading) return; RFloading = true;
+  fetch("data/refs.json").then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(d){ RF = d; RFloading = false; if(screen === "refs") go("refs", false); meta(); })
+    .catch(function(e){ RFerr = e; RFloading = false; if(screen === "refs") go("refs", false); });
+}
+function allRefs(){
+  var base = (RF ? RF.items : []).filter(function(r){ return !state.refs.hide[r.id]; }).map(function(r){ var ed = state.refs.edit[r.id]; return ed ? Object.assign({}, r, ed) : r; });
+  return base.concat(state.refs.items.filter(function(r){ return !state.refs.hide[r.id]; }));
+}
+function refTags(){ var c = {}; allRefs().forEach(function(r){ (r.tags || []).forEach(function(t){ c[t] = (c[t] || 0) + 1; }); }); return Object.keys(c).sort(function(a, b){ return c[b] - c[a]; }).map(function(k){ return {t: k, n: c[k]}; }); }
+function refFiltered(){
+  var q = RSEL.q.toLowerCase();
+  var L = allRefs().filter(function(r){
+    if(RSEL.tag && (r.tags || []).indexOf(RSEL.tag) < 0) return false;
+    if(RSEL.st !== "" && String(state.refs.st[r.id] || 0) !== RSEL.st) return false;
+    if(q){ var hay = [r.title, r.authors, r.venue, r.year, (r.tags || []).join(" "), state.refs.memo[r.id] || ""].join(" ").toLowerCase(); if(hay.indexOf(q) < 0) return false; }
+    return true; });
+  L.sort(function(a, b){ if(RSEL.sort === "year") return (b.year || 0) - (a.year || 0); if(RSEL.sort === "title") return String(a.title).localeCompare(String(b.title), "ko"); if(RSEL.sort === "added") return (b.added || "").localeCompare(a.added || ""); return (b.cited || 0) - (a.cited || 0); });
+  return L;
+}
+function scRefs(){
+  if(RFerr && !RF) RF = {items: [], built: ""};
+  if(!RF){ loadRF(); return '<section class="panel"><div class="panel-hd"><h2>문헌</h2></div><div class="panel-bd"><p class="empty">문헌 목록을 불러오는 중…</p></div></section>'; }
+  var A = allRefs(), cnt = {}; A.forEach(function(r){ var k = state.refs.st[r.id] || 0; cnt[k] = (cnt[k] || 0) + 1; });
+  var h = '<section class="stats">' +
+    tile("전체 문헌", A.length + "", (RF.items ? RF.items.length : 0) + " 초기 + " + state.refs.items.length + " 추가", "") +
+    tile("읽음", ((cnt[1] || 0) + (cnt[2] || 0) + (cnt[3] || 0)) + "", "읽음·요약·인용 예정", "accv", A.length ? ((cnt[1] || 0) + (cnt[2] || 0) + (cnt[3] || 0))/A.length*100 : 0, false) +
+    tile("요약 완료", (cnt[2] || 0) + "", "목표 30편 (2장 요약표)", (cnt[2] || 0) >= 30 ? "accv" : "", Math.min(100, (cnt[2] || 0)/30*100), false) +
+    tile("인용 예정", (cnt[3] || 0) + "", Object.keys(state.refs.cite).filter(function(k){ return state.refs.cite[k]; }).length + "편 장절 지정", "") +
+    '</section>';
+  h += '<section class="panel lift"><div class="panel-hd"><h2>문헌 목록</h2><p class="hint">' + (RF.built ? "초기 목록 " + RF.built + " · " : "") + '상태·인용 장절·메모는 이 브라우저에 저장</p>' +
+    '<div class="actions"><button class="abtn" data-act="refs-csv">CSV</button><button class="abtn" data-act="refs-bib">BibTeX</button><button class="abtn" data-act="refs-txt">참고문헌 목록</button>' +
+    '<button class="abtn" data-act="refs-import">RIS·BibTeX·CSV 가져오기</button><input type="file" id="refFile" accept=".ris,.bib,.txt,.csv" hidden><span class="msg" id="actMsg" role="status"></span></div></div>' +
+    '<div class="panel-bd" style="display:flex;flex-direction:column;gap:12px">' +
+    '<div class="reftools"><input type="search" id="refQ" placeholder="제목·저자·학술지·메모 검색" value="' + esc(RSEL.q) + '">' +
+    '<select data-rsel="tag"><option value="">전체 주제</option>' + refTags().map(function(t){ return '<option value="' + esc(t.t) + '"' + (t.t === RSEL.tag ? " selected" : "") + '>' + esc(t.t) + ' (' + t.n + ')</option>'; }).join("") + '</select>' +
+    '<select data-rsel="st"><option value="">전체 상태</option>' + REF_ST.map(function(n, i){ return '<option value="' + i + '"' + (String(i) === RSEL.st ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' +
+    '<select data-rsel="sort">' + [["cited", "인용수순"], ["year", "최신순"], ["title", "제목순"], ["added", "추가순"]].map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === RSEL.sort ? " selected" : "") + '>' + o[1] + '</option>'; }).join("") + '</select></div>' +
+    '<div class="reflist" id="reflist">' + refList() + '</div></div></section>';
+  h += '<section class="panel"><div class="panel-hd"><h2>문헌 추가</h2><p class="hint">DOI 만 넣고 「DOI 조회」를 누르면 Crossref 에서 서지 정보를 채웁니다</p></div><div class="panel-bd"><div class="addform">' +
+    '<div class="field"><label for="aDoi">DOI</label><div class="numrow" style="gap:6px"><input type="text" id="aDoi" placeholder="10.xxxx/…" style="flex:1"><button class="abtn" data-act="doi-lookup">DOI 조회</button></div></div>' +
+    '<div class="field wide"><label for="aTitle">제목</label><input type="text" id="aTitle"></div>' +
+    '<div class="field"><label for="aAu">저자</label><input type="text" id="aAu" placeholder="홍길동, 김철수"></div>' +
+    '<div class="field"><label for="aYear">연도</label><input type="text" id="aYear" placeholder="2024"></div>' +
+    '<div class="field"><label for="aVenue">학술지·출판</label><input type="text" id="aVenue"></div>' +
+    '<div class="field"><label for="aTags">주제 태그 (쉼표)</label><input type="text" id="aTags" placeholder="국내선행연구, DEA"></div>' +
+    '<div class="field wide"><label for="aUrl">URL</label><input type="url" id="aUrl" placeholder="https://"></div>' +
+    '<div class="actions wide" style="grid-column:1/-1"><button class="abtn primary" data-act="ref-add">추가</button><span class="msg" id="actMsg2" role="status"></span></div></div>' +
+    '<p class="dnote" style="margin-top:12px">국내 문헌은 RISS·KCI·DBpia 검색 결과를 RIS 또는 BibTeX 로 내보내 「가져오기」로 올리면 됩니다. 국외 문헌은 OpenAlex(초기 목록)와 Crossref(DOI 조회)를 씁니다. Zotero·EndNote 라이브러리도 같은 방식으로 가져올 수 있습니다.</p></div></section>';
+  return h;
+}
+function refList(){
+  var L = refFiltered(); if(!L.length) return '<p class="empty">조건에 맞는 문헌이 없습니다.</p>';
+  var secs = TOC.filter(function(x){ return x.l >= 2; });
+  return L.slice(0, 300).map(function(r){
+    var st = state.refs.st[r.id] || 0, url = r.doi ? "https://doi.org/" + r.doi : (r.url || "");
+    return '<div class="ref" data-rid="' + r.id + '"><div><div class="rt">' + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' : '') + esc(r.title || "(제목 없음)") + (url ? '</a>' : '') + '</div>' +
+      '<div class="rm">' + esc(r.authors || "") + (r.year ? ' <b>(' + r.year + ')</b>' : '') + (r.venue ? ' · ' + esc(r.venue) : '') + (r.cited != null ? ' · 인용 ' + r.cited : '') + (r.file ? ' · <span class="tag">PDF</span>' : '') + '</div>' +
+      '<div class="rtags">' + (r.tags || []).map(function(t){ return '<span class="tag" data-tagf="' + esc(t) + '">' + esc(t) + '</span>'; }).join("") + '</div>' +
+      (r.abstract ? '<div class="rab" data-ab>' + esc(r.abstract) + '</div>' : '') +
+      '<div class="memo"><textarea data-rmemo="' + r.id + '" maxlength="1500" placeholder="핵심 발견 · 변수 · 방법 · 한계">' + esc(state.refs.memo[r.id] || "") + '</textarea></div></div>' +
+      '<div class="rside"><select data-rst="' + r.id + '">' + REF_ST.map(function(n, i){ return '<option value="' + i + '"' + (i === st ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' +
+      '<select data-rcite="' + r.id + '"><option value="">인용 장절</option>' + secs.map(function(x){ return '<option value="' + x.id + '"' + (state.refs.cite[r.id] === x.id ? " selected" : "") + '>' + x.id + ' ' + esc(x.t.slice(0, 18)) + '</option>'; }).join("") + '</select>' +
+      '<button class="del" data-rdel="' + r.id + '">목록에서 숨기기</button></div></div>';
+  }).join("") + (L.length > 300 ? '<p class="empty">' + (L.length - 300) + '편 더 있음 — 검색으로 좁혀 주세요</p>' : '');
+}
+function wireRefs(root){
+  var q = document.getElementById("refQ"); if(q) q.addEventListener("input", function(){ RSEL.q = q.value; refresh(); });
+  each(root, "select[data-rsel]", "change", function(e){ RSEL[e.target.dataset.rsel] = e.target.value; refresh(); });
+  function refresh(){ var l = document.getElementById("reflist"); if(l){ l.innerHTML = refList(); bind(); } }
+  function bind(){
+    each(root, "select[data-rst]", "change", function(e){ state.refs.st[e.target.dataset.rst] = +e.target.value; save(); });
+    each(root, "select[data-rcite]", "change", function(e){ state.refs.cite[e.target.dataset.rcite] = e.target.value; save(); });
+    each(root, "textarea[data-rmemo]", "input", function(e){ state.refs.memo[e.target.dataset.rmemo] = e.target.value; save(); });
+    each(root, "[data-rdel]", "click", function(e){ state.refs.hide[e.currentTarget.dataset.rdel] = 1; save(); meta(); refresh(); });
+    each(root, "[data-tagf]", "click", function(e){ RSEL.tag = e.currentTarget.dataset.tagf; var sl = root.querySelector('select[data-rsel="tag"]'); if(sl) sl.value = RSEL.tag; refresh(); });
+    each(root, "[data-ab]", "click", function(e){ e.currentTarget.closest(".ref").classList.toggle("open"); });
+  }
+  bind();
+  var fi = document.getElementById("refFile");
+  if(fi) fi.addEventListener("change", function(){ var f = fi.files && fi.files[0]; if(!f) return; var rd = new FileReader();
+    rd.onload = function(){ var n = importRefs(rd.result, f.name); flash(n ? n + "편을 가져왔습니다" : "가져올 항목을 찾지 못했습니다"); go("refs", false); }; rd.readAsText(f, "utf-8"); fi.value = ""; });
+}
+function newRef(o){ o.id = "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); o.added = new Date().toISOString().slice(0, 10); o.source = o.source || "manual"; if(!o.tags) o.tags = []; state.refs.items.push(o); return o; }
+function importRefs(text, name){
+  var n = 0, low = name.toLowerCase();
+  if(low.endsWith(".ris") || /^TY  - /m.test(text)){
+    text.split(/\r?\nER  -/).forEach(function(rec){ if(!/TY  - /.test(rec)) return; var f = {}, au = [];
+      rec.split(/\r?\n/).forEach(function(l){ var m = l.match(/^([A-Z][A-Z0-9])  - (.*)$/); if(!m) return; var k = m[1], v = m[2].trim();
+        if(k === "AU" || k === "A1") au.push(v); else if(!f[k]) f[k] = v; });
+      var t = f.TI || f.T1; if(!t) return;
+      newRef({title: t, authors: au.join(", "), year: +(String(f.PY || f.Y1 || "").slice(0, 4)) || null, venue: f.JO || f.T2 || f.JF || f.PB || "", doi: (f.DO || "").replace(/^https?:\/\/doi.org\//, ""), url: f.UR || "", type: f.TY, tags: ["가져오기"], source: "ris"}); n++; });
+  } else if(low.endsWith(".bib") || /@\w+\s*\{/.test(text)){
+    text.split(/@(?=\w+\s*\{)/).slice(1).forEach(function(ent){ var f = {}; var re = /(\w+)\s*=\s*(\{((?:[^{}]|\{[^{}]*\})*)\}|"([^"]*)"|(\d+))/g, m;
+      while((m = re.exec(ent))) f[m[1].toLowerCase()] = (m[3] != null ? m[3] : (m[4] != null ? m[4] : m[5])).replace(/[{}]/g, "").replace(/\s+/g, " ").trim();
+      if(!f.title) return;
+      newRef({title: f.title, authors: (f.author || "").split(/\s+and\s+/).map(function(a){ var p = a.split(","); return p.length > 1 ? (p[1].trim() + " " + p[0].trim()) : a; }).join(", "), year: +f.year || null, venue: f.journal || f.booktitle || f.publisher || "", doi: (f.doi || "").replace(/^https?:\/\/doi.org\//, ""), url: f.url || "", type: "article", tags: ["가져오기"], source: "bibtex"}); n++; });
+  } else {
+    var rows = csvParse(text); if(rows.length < 2) return 0; var H = rows[0].map(function(h){ return h.toLowerCase(); });
+    var col = function(names){ for(var i = 0; i < H.length; i++) for(var j = 0; j < names.length; j++) if(H[i].indexOf(names[j]) >= 0) return i; return -1; };
+    var ci = {t: col(["title", "제목", "논문명"]), a: col(["author", "저자"]), y: col(["year", "연도", "발행년", "발행연도", "date"]), v: col(["journal", "source", "학술지", "간행물", "publication"]), d: col(["doi"]), u: col(["url", "link", "링크"])};
+    if(ci.t < 0) return 0;
+    rows.slice(1).forEach(function(r){ if(!r[ci.t]) return; newRef({title: r[ci.t], authors: ci.a >= 0 ? r[ci.a] : "", year: ci.y >= 0 ? (+String(r[ci.y]).slice(0, 4) || null) : null, venue: ci.v >= 0 ? r[ci.v] : "", doi: ci.d >= 0 ? (r[ci.d] || "").replace(/^https?:\/\/doi.org\//, "") : "", url: ci.u >= 0 ? r[ci.u] : "", type: "article", tags: ["가져오기"], source: "csv"}); n++; });
+  }
+  if(n){ save(); meta(); } return n;
+}
+function csvParse(t){ var rows = [], row = [], cur = "", q = false; for(var i = 0; i < t.length; i++){ var c = t[i];
+  if(q){ if(c === '"'){ if(t[i+1] === '"'){ cur += '"'; i++; } else q = false; } else cur += c; }
+  else if(c === '"') q = true; else if(c === ","){ row.push(cur); cur = ""; } else if(c === "\n" || c === "\r"){ if(c === "\r" && t[i+1] === "\n") i++; row.push(cur); rows.push(row); row = []; cur = ""; } else cur += c; }
+  if(cur || row.length){ row.push(cur); rows.push(row); } return rows.filter(function(r){ return r.some(function(x){ return x !== ""; }); }); }
+function refsCsv(){ var esc2 = function(v){ v = v == null ? "" : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  var L = [["id", "제목", "저자", "연도", "학술지", "DOI", "URL", "태그", "상태", "인용장절", "메모", "인용수"].join(",")];
+  allRefs().forEach(function(r){ L.push([r.id, r.title, r.authors, r.year, r.venue, r.doi, r.url, (r.tags || []).join(";"), REF_ST[state.refs.st[r.id] || 0], state.refs.cite[r.id] || "", state.refs.memo[r.id] || "", r.cited].map(esc2).join(",")); });
+  return "\ufeff" + L.join("\n"); }
+function refsBib(){ return allRefs().map(function(r, i){ var key = ((r.authors || "ref").split(/[, ]/)[0] || "ref").replace(/\W/g, "") + (r.year || "") + i;
+  return "@article{" + key + ",\n  title = {" + (r.title || "") + "},\n  author = {" + (r.authors || "").split(", ").join(" and ") + "},\n  year = {" + (r.year || "") + "},\n  journal = {" + (r.venue || "") + "}" + (r.doi ? ",\n  doi = {" + r.doi + "}" : "") + (r.url ? ",\n  url = {" + r.url + "}" : "") + "\n}"; }).join("\n\n"); }
+function refsTxt(){ return allRefs().filter(function(r){ return (state.refs.st[r.id] || 0) !== 4; }).sort(function(a, b){ return String(a.authors).localeCompare(String(b.authors), "ko"); })
+  .map(function(r){ return (r.authors || "") + " (" + (r.year || "n.d.") + "). " + (r.title || "") + ". " + (r.venue || "") + (r.doi ? ". https://doi.org/" + r.doi : (r.url ? ". " + r.url : "")); }).join("\n"); }
+function doiLookup(){
+  var d = (document.getElementById("aDoi").value || "").trim().replace(/^https?:\/\/(dx\.)?doi\.org\//, ""); if(!d){ flash("DOI 를 입력하세요", "actMsg2"); return; }
+  flash("Crossref 조회 중…", "actMsg2");
+  fetch("https://api.crossref.org/works/" + encodeURIComponent(d)).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); }).then(function(j){ var m = j.message;
+    document.getElementById("aTitle").value = (m.title || [""])[0]; document.getElementById("aAu").value = (m.author || []).map(function(a){ return (a.family || "") + (a.given ? " " + a.given : ""); }).join(", ");
+    var y = (m.issued && m.issued["date-parts"] && m.issued["date-parts"][0][0]) || ""; document.getElementById("aYear").value = y;
+    document.getElementById("aVenue").value = (m["container-title"] || [""])[0] || m.publisher || ""; document.getElementById("aUrl").value = m.URL || ""; flash("채웠습니다 — 확인 후 추가", "actMsg2");
+  }).catch(function(){ flash("Crossref 에서 찾지 못했습니다 (국내 DOI 는 KCI 에 등록된 경우만)", "actMsg2"); });
+}
+function refAdd(){
+  var t = document.getElementById("aTitle").value.trim(); if(!t){ flash("제목이 필요합니다", "actMsg2"); return; }
+  newRef({title: t, authors: document.getElementById("aAu").value.trim(), year: +document.getElementById("aYear").value || null, venue: document.getElementById("aVenue").value.trim(),
+          doi: document.getElementById("aDoi").value.trim().replace(/^https?:\/\/(dx\.)?doi\.org\//, ""), url: document.getElementById("aUrl").value.trim(), type: "article",
+          tags: document.getElementById("aTags").value.split(",").map(function(x){ return x.trim(); }).filter(Boolean)});
+  save(); meta(); go("refs", false); flash("추가했습니다");
+}
 /* ===================== 조각 ===================== */
 function tile(lab, val, note, cls, mp, warnM){
   var m = (mp === undefined) ? "" :
@@ -1167,6 +1466,8 @@ function wire(){
   });
   each(root, "[data-act]", "click", function(e){ act(e.currentTarget.dataset.act); });
   wireData(root);
+  wireToc(root);
+  wireRefs(root);
 
   var fi = document.getElementById("fileIn");
   if(fi) fi.addEventListener("change", function(){
@@ -1175,7 +1476,7 @@ function wire(){
     r.onload = function(){
       try{
         var d = JSON.parse(r.result);
-        if(!d || !d.w) throw new Error("형식 불일치");
+        if(!d || !(d.w || d.toc || d.refs)) throw new Error("형식 불일치");
         apply(d); save(); go("log", false); flash("복원했습니다", "actMsg2");
       }catch(err){ flash("복원하지 못했습니다 — 이 앱이 내려받은 .json인지 확인하세요", "actMsg2"); }
     };
@@ -1283,6 +1584,13 @@ function act(what){
     flash("내려받았습니다", "actMsg2");
   }
   else if(what === "restore"){ document.getElementById("fileIn").click(); }
+  else if(what === "toc-md"){ download("논문목차-진행-" + fmt(TODAY, true).replace(/\./g, "") + ".md", tocMd(), "text/markdown"); flash("내려받았습니다"); }
+  else if(what === "refs-csv"){ download("문헌목록.csv", refsCsv(), "text/csv"); flash("내려받았습니다"); }
+  else if(what === "refs-bib"){ download("문헌목록.bib", refsBib(), "application/x-bibtex"); flash("내려받았습니다"); }
+  else if(what === "refs-txt"){ download("참고문헌.txt", refsTxt(), "text/plain"); flash("내려받았습니다"); }
+  else if(what === "refs-import"){ document.getElementById("refFile").click(); }
+  else if(what === "doi-lookup"){ doiLookup(); }
+  else if(what === "ref-add"){ refAdd(); }
 }
 function fallbackCopy(text){
   var ta = document.createElement("textarea");
