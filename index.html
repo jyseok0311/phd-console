@@ -420,6 +420,25 @@ table.dt td.dim{color:var(--ink-3); font-size:11.5px}
 .ref .rm{font-size:11.5px; color:var(--ink-2); margin-top:2px} .ref .rm b{color:var(--ink); font-weight:500}
 .ref .rtags{display:flex; gap:4px; flex-wrap:wrap; margin-top:5px}
 .ref .rtags .tag{cursor:pointer}
+.ref .rt .tag{margin-left:5px; vertical-align:2px; font-weight:600}
+.tag.dupb{border-style:dashed; border-color:var(--warn-line); color:var(--warn)}
+.tag.want{border-color:var(--warn-line); color:var(--warn); background:var(--warn-soft)}
+/* 묶음별 보기 — 영역 머리와 묶음 머리 */
+.grparea{font-size:var(--t-lab); font-weight:700; letter-spacing:.1em; color:var(--accent-ink);
+  padding:14px 10px 4px; border-bottom:1px solid var(--accent-line); margin-top:6px}
+.grparea:first-child{margin-top:0}
+.grpbar{display:flex; flex-wrap:wrap; align-items:baseline; gap:3px 9px;
+  padding:9px 10px; background:var(--surface-2); border-radius:var(--r-s); margin-top:8px}
+.grpbar b{font-size:var(--t-s); font-weight:600; color:var(--ink)}
+.grpbar .n{font-size:var(--t-xs); color:var(--ink-3)}
+.grpbar .use{flex-basis:100%; font-size:var(--t-xs); color:var(--accent-ink); line-height:1.5}
+.ref.wanted{grid-template-columns:minmax(0,1fr) 168px; background:var(--warn-soft)}
+.ref.wanted:hover{background:var(--warn-soft)}
+.ref .rwhy{font-size:var(--t-xs); color:var(--ink-2); margin-top:5px; line-height:1.55}
+.ref .racc{font-size:11px; color:var(--warn); line-height:1.45; text-align:right}
+.rchk{display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--ink-2);
+  border:1px solid var(--line); border-radius:var(--r-s); padding:4px 8px; background:var(--ground); cursor:pointer; white-space:nowrap}
+.rchk input{margin:0; accent-color:var(--accent)}
 .ref .rside{display:flex; flex-direction:column; gap:5px}
 .ref .rside select, .ref .rside input{font:inherit; font-size:11px; color:var(--ink); background:var(--ground); border:1px solid var(--line); border-radius:var(--r-s); padding:3px 5px; width:100%}
 .ref .rside .del{font-size:10.5px; color:var(--ink-3); text-align:right}
@@ -1225,9 +1244,28 @@ function wireToc(root){
 /* ===================== 화면: 문헌 ===================== */
 /* data/refs.json(초기 문헌: 선행연구 PDF + OpenAlex) + 사용자가 추가·수정한 항목(state.refs). 상태·인용 장절·메모는 id 기준으로 저장 */
 var RF = null, RFerr = null, RFloading = false;
-var RSEL = {q:"", tag:"", st:"", sort:"cited"};
+var RSEL = {q:"", tag:"", st:"", sort:"cited", area:"", grp:"", core:false, nodup:true, byGrp:false};
 var REF_ST = ["미읽음", "읽음", "요약 완료", "인용 예정", "제외"];
+/* data/refs_themes.json — 제2장 목차에 대응하는 묶음 분류(사이드카).
+   refs.json 은 collect_references.py 가 통째로 재생성하므로 분류를 태그에 적지 않고
+   별도 파일에 두고 id 로 대조한다. 파일이 없으면 분류 기능만 비활성되고 목록은 그대로 뜬다. */
+var TH = null, THloading = false;
+function loadTH(){
+  if(TH || THloading) return; THloading = true;
+  fetch("data/refs_themes.json").then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(d){ TH = d; THloading = false; if(screen === "refs") go("refs", false); })
+    .catch(function(){ TH = {areas:[], groups:{}, items:{}, wanted:[]}; THloading = false; if(screen === "refs") go("refs", false); });
+}
+function thOf(r){ return (TH && TH.items && TH.items[r.id]) || null; }
+function grpMeta(k){ return (TH && TH.groups && TH.groups[k]) || null; }
+/* 표시 순서가 정해진 묶음 목록 */
+function grpList(){
+  if(!TH || !TH.groups) return [];
+  return Object.keys(TH.groups).map(function(k){ var g = TH.groups[k]; return {k:k, area:g.area, at:g.area_t, t:g.title, use:g.use, o:(g.order === undefined ? 99 : g.order)}; })
+    .sort(function(a, b){ return a.o - b.o; });
+}
 function loadRF(){
+  loadTH();
   if(RF || RFloading) return; RFloading = true;
   fetch("data/refs.json").then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
     .then(function(d){ RF = d; RFloading = false; if(screen === "refs") go("refs", false); meta(); })
@@ -1243,6 +1281,11 @@ function refFiltered(){
   var L = allRefs().filter(function(r){
     if(RSEL.tag && (r.tags || []).indexOf(RSEL.tag) < 0) return false;
     if(RSEL.st !== "" && String(state.refs.st[r.id] || 0) !== RSEL.st) return false;
+    var th = thOf(r);
+    if(RSEL.area && !(th && String(th.theme).charAt(0) === RSEL.area)) return false;
+    if(RSEL.grp && !(th && th.theme === RSEL.grp)) return false;
+    if(RSEL.core && !(th && th.core)) return false;
+    if(RSEL.nodup && th && th.dup_of) return false;
     if(q){ var hay = [r.title, r.authors, r.venue, r.year, (r.tags || []).join(" "), state.refs.memo[r.id] || ""].join(" ").toLowerCase(); if(hay.indexOf(q) < 0) return false; }
     return true; });
   L.sort(function(a, b){ if(RSEL.sort === "year") return (b.year || 0) - (a.year || 0); if(RSEL.sort === "title") return String(a.title).localeCompare(String(b.title), "ko"); if(RSEL.sort === "added") return (b.added || "").localeCompare(a.added || ""); return (b.cited || 0) - (a.cited || 0); });
@@ -1257,15 +1300,28 @@ function scRefs(){
     tile("읽음", ((cnt[1] || 0) + (cnt[2] || 0) + (cnt[3] || 0)) + "", "읽음·요약·인용 예정", "accv", A.length ? ((cnt[1] || 0) + (cnt[2] || 0) + (cnt[3] || 0))/A.length*100 : 0, false) +
     tile("요약 완료", (cnt[2] || 0) + "", "목표 30편 (2장 요약표)", (cnt[2] || 0) >= 30 ? "accv" : "", Math.min(100, (cnt[2] || 0)/30*100), false) +
     tile("인용 예정", (cnt[3] || 0) + "", Object.keys(state.refs.cite).filter(function(k){ return state.refs.cite[k]; }).length + "편 장절 지정", "") +
+    (TH && TH.items ? (function(){
+      var core = A.filter(function(r){ var t = thOf(r); return t && t.core; });
+      var read = core.filter(function(r){ return (state.refs.st[r.id] || 0) >= 2; }).length;
+      var want = (TH.wanted || []).length;
+      return tile("★ 핵심 문헌", core.length + "", "요약 완료 " + read + "편", read >= core.length && core.length ? "accv" : "", core.length ? read / core.length * 100 : 0, false) +
+        tile("확보 필요", want + "", "목차가 요구하나 목록에 없음", want ? "warnv" : "");
+    })() : "") +
     '</section>';
   h += '<section class="panel lift"><div class="panel-hd"><h2>문헌 목록</h2><p class="hint">' + (RF.built ? "초기 목록 " + RF.built + " · " : "") + '상태·인용 장절·메모는 이 브라우저에 저장</p>' +
     '<div class="actions"><button class="abtn" data-act="refs-csv">CSV</button><button class="abtn" data-act="refs-bib">BibTeX</button><button class="abtn" data-act="refs-txt">참고문헌 목록</button>' +
     '<button class="abtn" data-act="refs-import">RIS·BibTeX·CSV 가져오기</button><input type="file" id="refFile" accept=".ris,.bib,.txt,.csv" hidden><span class="msg" id="actMsg" role="status"></span></div></div>' +
     '<div class="panel-bd" style="display:flex;flex-direction:column;gap:12px">' +
     '<div class="reftools"><input type="search" id="refQ" placeholder="제목·저자·학술지·메모 검색" value="' + esc(RSEL.q) + '">' +
+    (TH && TH.areas && TH.areas.length ? '<select data-rsel="area"><option value="">전체 영역</option>' + TH.areas.map(function(a){ return '<option value="' + esc(a.id) + '"' + (a.id === RSEL.area ? " selected" : "") + '>' + esc(a.id) + ' ' + esc(a.t) + '</option>'; }).join("") + '</select>' : '') +
+    (TH && TH.groups ? '<select data-rsel="grp"><option value="">전체 묶음</option>' + grpList().filter(function(g){ return !RSEL.area || g.area === RSEL.area; }).map(function(g){ return '<option value="' + esc(g.k) + '"' + (g.k === RSEL.grp ? " selected" : "") + '>' + esc(g.k) + ' ' + esc(g.t) + '</option>'; }).join("") + '</select>' : '') +
     '<select data-rsel="tag"><option value="">전체 주제</option>' + refTags().map(function(t){ return '<option value="' + esc(t.t) + '"' + (t.t === RSEL.tag ? " selected" : "") + '>' + esc(t.t) + ' (' + t.n + ')</option>'; }).join("") + '</select>' +
     '<select data-rsel="st"><option value="">전체 상태</option>' + REF_ST.map(function(n, i){ return '<option value="' + i + '"' + (String(i) === RSEL.st ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' +
-    '<select data-rsel="sort">' + [["cited", "인용수순"], ["year", "최신순"], ["title", "제목순"], ["added", "추가순"]].map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === RSEL.sort ? " selected" : "") + '>' + o[1] + '</option>'; }).join("") + '</select></div>' +
+    '<select data-rsel="sort">' + [["cited", "인용수순"], ["year", "최신순"], ["title", "제목순"], ["added", "추가순"]].map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === RSEL.sort ? " selected" : "") + '>' + o[1] + '</option>'; }).join("") + '</select>' +
+    (TH && TH.groups ? '<label class="rchk"><input type="checkbox" data-rchk="byGrp"' + (RSEL.byGrp ? " checked" : "") + '> 묶음별 보기</label>' +
+      '<label class="rchk"><input type="checkbox" data-rchk="core"' + (RSEL.core ? " checked" : "") + '> ★ 핵심만</label>' +
+      '<label class="rchk"><input type="checkbox" data-rchk="nodup"' + (RSEL.nodup ? " checked" : "") + '> 중복 숨김</label>' : '') +
+    '</div>' +
     '<div class="reflist" id="reflist">' + refList() + '</div></div></section>';
   h += '<section class="panel"><div class="panel-hd"><h2>문헌 추가</h2><p class="hint">DOI 만 넣고 「DOI 조회」를 누르면 Crossref 에서 서지 정보를 채웁니다</p></div><div class="panel-bd"><div class="addform">' +
     '<div class="field"><label for="aDoi">DOI</label><div class="numrow" style="gap:6px"><input type="text" id="aDoi" placeholder="10.xxxx/…" style="flex:1"><button class="abtn" data-act="doi-lookup">DOI 조회</button></div></div>' +
@@ -1279,24 +1335,84 @@ function scRefs(){
     '<p class="dnote" style="margin-top:12px">국내 문헌은 RISS·KCI·DBpia 검색 결과를 RIS 또는 BibTeX 로 내보내 「가져오기」로 올리면 됩니다. 국외 문헌은 OpenAlex(초기 목록)와 Crossref(DOI 조회)를 씁니다. Zotero·EndNote 라이브러리도 같은 방식으로 가져올 수 있습니다.</p></div></section>';
   return h;
 }
-function refList(){
-  var L = refFiltered(); if(!L.length) return '<p class="empty">조건에 맞는 문헌이 없습니다.</p>';
+/* 묶음별 보기 — 묶음 머리에 「어디에 쓰나」(대응 절)를 붙여 집필 순서를 잡을 수 있게 한다 */
+function refListGrouped(){
+  var L = refFiltered();
+  /* 「확보 필요」만 남는 조건(영역 W 선택 등)에서도 그 묶음은 보여야 하므로 여기서 조기 반환하지 않는다 */
+  if(!L.length && !g_wantedVisible()) return '<p class="empty">조건에 맞는 문헌이 없습니다.</p>';
+  var by = {}; var none = [];
+  L.forEach(function(r){ var th = thOf(r); if(th && th.theme){ (by[th.theme] = by[th.theme] || []).push(r); } else none.push(r); });
+  var h = "", area = "";
+  grpList().forEach(function(g){
+    var rows = by[g.k]; if(!rows || !rows.length) return;
+    if(g.at !== area){ area = g.at; h += '<div class="grparea">' + esc(area) + '</div>'; }
+    h += '<div class="grpbar"><b>' + esc(g.t) + '</b><span class="n">' + rows.length + '편</span>' +
+         (g.use ? '<span class="use">' + esc(g.use) + '</span>' : '') + '</div>';
+    h += rows.map(refRow).join("");
+  });
+  if(g_wantedVisible()) h += refWanted();
+  if(none.length){ h += '<div class="grpbar"><b>미분류</b><span class="n">' + none.length + '편</span>' +
+    '<span class="use">사이드카에 분류가 없는 항목. 직접 추가하거나 가져온 문헌이다</span></div>' + none.map(refRow).join(""); }
+  return h || '<p class="empty">조건에 맞는 문헌이 없습니다.</p>';
+}
+/* 확보 필요(보충 권장) 묶음은 검색·영역 조건에 맞을 때만 노출 */
+function g_wantedVisible(){
+  if(!TH || !TH.wanted || !TH.wanted.length) return false;
+  if(RSEL.grp && RSEL.grp !== "W1") return false;
+  if(RSEL.area && RSEL.area !== "W") return false;
+  if(RSEL.st !== "") return false;
+  return true;
+}
+function refWanted(){
+  var q = RSEL.q.toLowerCase();
+  var W = TH.wanted.filter(function(w){ if(!q) return true; return [w.title, w.authors, w.venue, w.why].join(" ").toLowerCase().indexOf(q) >= 0; });
+  if(!W.length) return "";
+  var g = grpMeta("W1") || {};
+  return '<div class="grparea">확보 필요</div>' +
+    '<div class="grpbar"><b>' + esc(g.title || "보충 권장 문헌") + '</b><span class="n">' + W.length + '편</span>' +
+    '<span class="use">목차가 요구하는데 목록에 없는 문헌. 확보한 뒤 「문헌 추가」로 등록하면 이 묶음에서 사라진다</span></div>' +
+    W.map(function(w){
+      var url = w.doi ? "https://doi.org/" + w.doi : "";
+      return '<div class="ref wanted"><div><div class="rt">' + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' : '') +
+        esc(w.title) + (url ? '</a>' : '') + '<span class="tag want">확보 필요</span></div>' +
+        '<div class="rm">' + esc(w.authors) + ' <b>(' + w.year + ')</b>' + (w.venue ? ' · ' + esc(w.venue) : '') + '</div>' +
+        '<div class="rwhy">' + esc(w.why) + '</div></div>' +
+        '<div class="rside"><span class="racc">' + esc(w.access || "") + '</span></div></div>';
+    }).join("");
+}
+function refRow(r){
   var secs = TOC.filter(function(x){ return x.l >= 2; });
-  return L.slice(0, 300).map(function(r){
-    var st = state.refs.st[r.id] || 0, url = r.doi ? "https://doi.org/" + r.doi : (r.url || "");
-    return '<div class="ref" data-rid="' + r.id + '"><div><div class="rt">' + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' : '') + esc(r.title || "(제목 없음)") + (url ? '</a>' : '') + '</div>' +
-      '<div class="rm">' + esc(r.authors || "") + (r.year ? ' <b>(' + r.year + ')</b>' : '') + (r.venue ? ' · ' + esc(r.venue) : '') + (r.cited != null ? ' · 인용 ' + r.cited : '') + (r.file ? ' · <span class="tag">PDF</span>' : '') + '</div>' +
-      '<div class="rtags">' + (r.tags || []).map(function(t){ return '<span class="tag" data-tagf="' + esc(t) + '">' + esc(t) + '</span>'; }).join("") + '</div>' +
-      (r.abstract ? '<div class="rab" data-ab>' + esc(r.abstract) + '</div>' : '') +
-      '<div class="memo"><textarea data-rmemo="' + r.id + '" maxlength="1500" placeholder="핵심 발견 · 변수 · 방법 · 한계">' + esc(state.refs.memo[r.id] || "") + '</textarea></div></div>' +
-      '<div class="rside"><select data-rst="' + r.id + '">' + REF_ST.map(function(n, i){ return '<option value="' + i + '"' + (i === st ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' +
-      '<select data-rcite="' + r.id + '"><option value="">인용 장절</option>' + secs.map(function(x){ return '<option value="' + x.id + '"' + (state.refs.cite[r.id] === x.id ? " selected" : "") + '>' + x.id + ' ' + esc(x.t.slice(0, 18)) + '</option>'; }).join("") + '</select>' +
-      '<button class="del" data-rdel="' + r.id + '">목록에서 숨기기</button></div></div>';
-  }).join("") + (L.length > 300 ? '<p class="empty">' + (L.length - 300) + '편 더 있음 — 검색으로 좁혀 주세요</p>' : '');
+  var st = state.refs.st[r.id] || 0, url = r.doi ? "https://doi.org/" + r.doi : (r.url || "");
+  var th = thOf(r) || {};
+  var badges = (th.core ? '<span class="tag key" title="핵심 문헌">★ 핵심</span>' : '') +
+    (th.marginal ? '<span class="tag rest" title="주제와 거리가 있어 인용 여부 검토">주변</span>' : '') +
+    (th.dup_of ? '<span class="tag dupb" title="같은 연구가 ' + esc(th.dup_of) + ' 로도 등록돼 있다">중복 ' + esc(th.dup_of) + '</span>' : '');
+  return '<div class="ref" data-rid="' + r.id + '"><div><div class="rt">' + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' : '') + esc(r.title || "(제목 없음)") + (url ? '</a>' : '') + badges + '</div>' +
+    '<div class="rm">' + esc(r.authors || "") + (r.year ? ' <b>(' + r.year + ')</b>' : '') + (r.venue ? ' · ' + esc(r.venue) : '') + (r.cited != null ? ' · 인용 ' + r.cited : '') + (r.file ? ' · <span class="tag">PDF</span>' : '') + '</div>' +
+    '<div class="rtags">' + (r.tags || []).map(function(t){ return '<span class="tag" data-tagf="' + esc(t) + '">' + esc(t) + '</span>'; }).join("") + '</div>' +
+    (r.abstract ? '<div class="rab" data-ab>' + esc(r.abstract) + '</div>' : '') +
+    '<div class="memo"><textarea data-rmemo="' + r.id + '" maxlength="1500" placeholder="핵심 발견 · 변수 · 방법 · 한계">' + esc(state.refs.memo[r.id] || "") + '</textarea></div></div>' +
+    '<div class="rside"><select data-rst="' + r.id + '">' + REF_ST.map(function(n, i){ return '<option value="' + i + '"' + (i === st ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' +
+    '<select data-rcite="' + r.id + '"><option value="">인용 장절</option>' + secs.map(function(x){ return '<option value="' + x.id + '"' + (state.refs.cite[r.id] === x.id ? " selected" : "") + '>' + x.id + ' ' + esc(x.t.slice(0, 18)) + '</option>'; }).join("") + '</select>' +
+    '<button class="del" data-rdel="' + r.id + '">목록에서 숨기기</button></div></div>';
+}
+function refList(){
+  if(RSEL.byGrp) return refListGrouped();
+  var L = refFiltered();
+  if(!L.length) return g_wantedVisible() ? (refWanted() || '<p class="empty">조건에 맞는 문헌이 없습니다.</p>') : '<p class="empty">조건에 맞는 문헌이 없습니다.</p>';
+  return L.slice(0, 300).map(refRow).join("") +
+    (L.length > 300 ? '<p class="empty">' + (L.length - 300) + '편 더 있음 — 검색으로 좁혀 주세요</p>' : '') +
+    (g_wantedVisible() ? refWanted() : '');
 }
 function wireRefs(root){
   var q = document.getElementById("refQ"); if(q) q.addEventListener("input", function(){ RSEL.q = q.value; refresh(); });
-  each(root, "select[data-rsel]", "change", function(e){ RSEL[e.target.dataset.rsel] = e.target.value; refresh(); });
+  each(root, "select[data-rsel]", "change", function(e){
+    var k = e.target.dataset.rsel; RSEL[k] = e.target.value;
+    if(k === "area") RSEL.grp = "";           /* 영역을 바꾸면 묶음 선택을 비운다 */
+    if(k === "grp" && RSEL.grp) RSEL.byGrp = false;
+    go("refs", false);                         /* 묶음 목록이 영역에 따라 달라지므로 화면을 다시 그린다 */
+  });
+  each(root, "input[data-rchk]", "change", function(e){ RSEL[e.target.dataset.rchk] = e.target.checked; go("refs", false); });
   function refresh(){ var l = document.getElementById("reflist"); if(l){ l.innerHTML = refList(); bind(); } }
   function bind(){
     each(root, "select[data-rst]", "change", function(e){ state.refs.st[e.target.dataset.rst] = +e.target.value; save(); });
@@ -1339,8 +1455,12 @@ function csvParse(t){ var rows = [], row = [], cur = "", q = false; for(var i = 
   else if(c === '"') q = true; else if(c === ","){ row.push(cur); cur = ""; } else if(c === "\n" || c === "\r"){ if(c === "\r" && t[i+1] === "\n") i++; row.push(cur); rows.push(row); row = []; cur = ""; } else cur += c; }
   if(cur || row.length){ row.push(cur); rows.push(row); } return rows.filter(function(r){ return r.some(function(x){ return x !== ""; }); }); }
 function refsCsv(){ var esc2 = function(v){ v = v == null ? "" : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
-  var L = [["id", "제목", "저자", "연도", "학술지", "DOI", "URL", "태그", "상태", "인용장절", "메모", "인용수"].join(",")];
-  allRefs().forEach(function(r){ L.push([r.id, r.title, r.authors, r.year, r.venue, r.doi, r.url, (r.tags || []).join(";"), REF_ST[state.refs.st[r.id] || 0], state.refs.cite[r.id] || "", state.refs.memo[r.id] || "", r.cited].map(esc2).join(",")); });
+  var L = [["id", "제목", "저자", "연도", "학술지", "DOI", "URL", "태그", "상태", "인용장절", "메모", "인용수", "영역", "묶음", "핵심", "주변", "중복대상"].join(",")];
+  allRefs().forEach(function(r){ var t = thOf(r) || {}, g = grpMeta(t.theme) || {};
+    L.push([r.id, r.title, r.authors, r.year, r.venue, r.doi, r.url, (r.tags || []).join(";"), REF_ST[state.refs.st[r.id] || 0], state.refs.cite[r.id] || "", state.refs.memo[r.id] || "", r.cited,
+      g.area_t || "", g.title || "", t.core ? "★" : "", t.marginal ? "주변" : "", t.dup_of || ""].map(esc2).join(",")); });
+  (TH && TH.wanted ? TH.wanted : []).forEach(function(w){
+    L.push([w.id, w.title, w.authors, w.year, w.venue, w.doi, "", "보충권장", "확보 필요", "", w.why, "", "확보 필요", "보충 권장 문헌", "★", "", ""].map(esc2).join(",")); });
   return "\ufeff" + L.join("\n"); }
 function refsBib(){ return allRefs().map(function(r, i){ var key = ((r.authors || "ref").split(/[, ]/)[0] || "ref").replace(/\W/g, "") + (r.year || "") + i;
   return "@article{" + key + ",\n  title = {" + (r.title || "") + "},\n  author = {" + (r.authors || "").split(", ").join(" and ") + "},\n  year = {" + (r.year || "") + "},\n  journal = {" + (r.venue || "") + "}" + (r.doi ? ",\n  doi = {" + r.doi + "}" : "") + (r.url ? ",\n  url = {" + r.url + "}" : "") + "\n}"; }).join("\n\n"); }
