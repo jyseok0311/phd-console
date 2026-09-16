@@ -1386,10 +1386,12 @@ function refRow(r){
   return '<div class="ref" data-rid="' + r.id + '"><div><div class="rt">' + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' : '') + esc(r.title || "(제목 없음)") + (url ? '</a>' : '') + badges + '</div>' +
     '<div class="rm">' + esc(r.authors || "") + (r.year ? ' <b>(' + r.year + ')</b>' : '') + (r.venue ? ' · ' + esc(r.venue) : '') + (r.cited != null ? ' · 인용 ' + r.cited : '') + (r.file ? ' · <span class="tag">PDF</span>' : '') + '</div>' +
     '<div class="rtags">' + (r.tags || []).map(function(t){ return '<span class="tag" data-tagf="' + esc(t) + '">' + esc(t) + '</span>'; }).join("") + '</div>' +
+    (th.note ? '<div class="rwhy">쓸 곳 — ' + esc(th.note) + '</div>' : '') +
     (r.abstract ? '<div class="rab" data-ab>' + esc(r.abstract) + '</div>' : '') +
     '<div class="memo"><textarea data-rmemo="' + r.id + '" maxlength="1500" placeholder="핵심 발견 · 변수 · 방법 · 한계">' + esc(state.refs.memo[r.id] || "") + '</textarea></div></div>' +
     '<div class="rside"><select data-rst="' + r.id + '">' + REF_ST.map(function(n, i){ return '<option value="' + i + '"' + (i === st ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' +
     '<select data-rcite="' + r.id + '"><option value="">인용 장절</option>' + secs.map(function(x){ return '<option value="' + x.id + '"' + (state.refs.cite[r.id] === x.id ? " selected" : "") + '>' + x.id + ' ' + esc(x.t.slice(0, 18)) + '</option>'; }).join("") + '</select>' +
+    (th.access ? '<span class="racc">' + esc(th.access) + '</span>' : '') +
     '<button class="del" data-rdel="' + r.id + '">목록에서 숨기기</button></div></div>';
 }
 function refList(){
