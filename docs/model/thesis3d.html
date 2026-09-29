@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 원본: 박사학위논문 구조 입체도. 콘솔 「입체도」 메뉴가 ?embed=1 로 싣는다 -->
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<title>학위논문 구조 입체도</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --void:#0B0C0D; --void-2:#111413; --bone:#EDE8DF; --bone-dim:#9AA3A0;
+    --gold:#C9A227; --gold-soft:#6A5417; --line:#232A28;
+    --s1:#DCEBE8; --s2:#A9D2CA; --s3:#6FB5A9; --s4:#358E81; --s5:#0F5F58;
+    --f:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--void);color:var(--bone);font-family:var(--f);overflow:hidden;
+    -webkit-font-smoothing:antialiased;word-break:keep-all}
+  #cv{position:fixed;top:0;left:0;width:100vw;height:100vh;display:block;touch-action:none;cursor:grab}
+  #cv.drag{cursor:grabbing}
+  #lab{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+  .lb{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;
+    font-size:11px;letter-spacing:.01em;color:var(--bone-dim);text-shadow:0 1px 3px #000,0 0 8px #000;
+    transition:opacity .18s ease}
+  .lb.ch{font-size:15px;font-weight:700;color:var(--bone);letter-spacing:-.01em}
+  .lb.sp{color:var(--gold);font-weight:600}
+  .lb.stg{font-size:11.5px;font-weight:700;padding:2px 7px;border:1px solid var(--gold-soft);
+    border-radius:4px;background:rgba(11,12,13,.78);text-shadow:none}
+  .lb.rail{font-size:10.5px;font-weight:600;letter-spacing:.06em;color:var(--bone)}
+  .lb.cube{font-size:10.5px;color:var(--bone-dim);letter-spacing:.06em}
+
+  .card{position:fixed;background:rgba(11,12,13,.82);border:1px solid var(--line);
+    border-radius:10px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  #hd{top:18px;left:18px;padding:14px 17px;max-width:min(30rem,calc(100vw - 36px))}
+  #hd .eye{font-size:10px;letter-spacing:.18em;color:var(--gold);font-weight:600;margin-bottom:7px}
+  #hd h1{margin:0;font-size:clamp(15px,3.4vw,19px);font-weight:700;line-height:1.4;letter-spacing:-.01em}
+  #hd p{margin:7px 0 0;font-size:11.5px;line-height:1.6;color:var(--bone-dim)}
+  #hd .st{display:flex;flex-wrap:wrap;gap:3px 13px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+  #hd .st b{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+  #hd .st span{font-size:10px;color:var(--bone-dim);margin-left:3px}
+
+  #lg{left:18px;bottom:18px;padding:12px 15px;font-size:11px;line-height:1.75;max-width:14rem}
+  #lg .t{font-size:9.5px;letter-spacing:.14em;color:var(--bone-dim);font-weight:600;margin-bottom:7px}
+  #lg .row{display:flex;align-items:center;gap:7px}
+  #lg i{width:11px;height:11px;border-radius:50%;flex:0 0 auto;display:inline-block}
+  #lg .sc{display:flex;gap:2px;margin:5px 0 3px;width:100%}
+  #lg .sc i{flex:1 1 0;min-width:0;width:auto;height:7px;border-radius:2px}
+  #lg .scl{display:flex;justify-content:space-between;font-size:9.5px;color:var(--bone-dim);font-variant-numeric:tabular-nums}
+
+  #inf{right:18px;top:18px;width:min(20rem,calc(100vw - 36px));padding:0;opacity:0;
+    transform:translateY(-6px);transition:opacity .2s ease,transform .2s ease;pointer-events:none}
+  #inf.on{opacity:1;transform:none;pointer-events:auto}
+  #inf .hd{padding:13px 16px 11px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline}
+  #inf .id{font-size:11px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;flex:0 0 auto}
+  #inf .tt{font-size:13.5px;font-weight:600;line-height:1.45}
+  #inf .bd{padding:12px 16px 14px;display:flex;flex-direction:column;gap:9px}
+  #inf .kv{display:flex;justify-content:space-between;gap:12px;font-size:11.5px}
+  #inf .kv span{color:var(--bone-dim)}
+  #inf .kv b{font-weight:600;font-variant-numeric:tabular-nums}
+  #inf .note{font-size:11px;line-height:1.65;color:var(--bone-dim);padding-top:9px;border-top:1px solid var(--line)}
+  #inf .x{position:absolute;top:9px;right:11px;background:none;border:0;color:var(--bone-dim);
+    font-size:17px;line-height:1;cursor:pointer;padding:3px 5px;border-radius:5px}
+  #inf .x:hover{color:var(--bone);background:rgba(255,255,255,.07)}
+
+  #ctl{right:18px;bottom:18px;padding:9px 13px;font-size:10.5px;color:var(--bone-dim);line-height:1.7}
+  #ctl b{color:var(--bone);font-weight:600}
+  #tog{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  #tog button{font:inherit;font-size:11px;padding:7px 13px;background:rgba(11,12,13,.9);color:var(--bone-dim);
+    border:0;cursor:pointer;white-space:nowrap}
+  #tog button.on{background:var(--gold);color:#17130A;font-weight:600}
+  #tog button:focus-visible,#inf .x:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+
+  /* 콘솔 안에 넣었을 때(?embed=1) — 제목 카드는 콘솔 화면 머리가 대신한다 */
+  body.embed #hd{display:none}
+  body.embed #inf{top:14px;right:14px}
+  #toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);padding:10px 16px;
+    background:rgba(11,12,13,.9);border:1px solid var(--line);border-radius:8px;font-size:12.5px;
+    color:var(--bone);pointer-events:none;opacity:0;transition:opacity .25s ease}
+  #toast.on{opacity:1}
+  #inf .go{margin-top:2px;align-self:flex-start;font:inherit;font-size:11.5px;font-weight:600;
+    padding:6px 11px;border-radius:6px;border:1px solid var(--gold-soft);background:transparent;color:var(--gold);cursor:pointer}
+  #inf .go:hover{background:rgba(201,162,39,.1)}
+  #inf .go:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  #inf .bar{height:4px;border-radius:2px;background:var(--line);overflow:hidden;margin-top:3px}
+  #inf .bar i{display:block;height:100%;background:var(--s3)}
+  @media (max-width:700px){
+    #hd{max-width:calc(100vw - 32px);left:16px;top:14px;padding:12px 14px}
+    #hd p{display:none}
+    #tog{bottom:14px}
+    #tog button{padding:7px 10px}
+    #lg{display:none}
+    #ctl{display:none}
+    #inf{right:16px;left:16px;top:auto;bottom:60px;width:auto}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="lab" aria-hidden="true"></div>
+
+<header class="card" id="hd">
+  <div class="eye">학위논문 구조 입체도</div>
+  <h1>대학의 상대적 효율성과 성과 격차의 결정요인 분석</h1>
+  <p>2015~2025년 전국 4년제 대학 패널자료를 활용한 DEA-Tobit 접근. 5개 장이 아래에서 위로 쌓입니다. 금빛 사다리의 세 가로대는 각 분석 단계의 모형(3장)이 결과(4장)로 이어지는 길이고, 레일은 1→2→3단계의 순서입니다.</p>
+  <div class="st">
+    <div><b id="stCh">5</b><span>장</span></div><div><b id="stSec">43</b><span>절·항</span></div>
+    <div><b>190</b><span>개교</span></div><div><b>2,049</b><span>관측</span></div>
+    <div><b>300</b><span>변수</span></div><div><b>257</b><span>문헌</span></div>
+  </div>
+</header>
+
+<aside class="card" id="lg">
+  <div class="t">범례</div>
+  <div class="row"><i style="background:var(--gold)"></i>분석 사다리 · 모형 → 결과</div>
+  <div class="row"><i style="background:var(--bone);opacity:.8"></i>장 (<span id="lgCh">5</span>)</div>
+  <div class="row"><i style="background:var(--s3)"></i>절 (<span id="lgSec">20</span>)</div>
+  <div class="row"><i style="background:var(--s2);width:8px;height:8px"></i>항 (<span id="lgSub">18</span>)</div>
+  <div class="t" style="margin-top:11px">구 크기 · 예상 쪽수</div>
+  <div class="t" style="margin-top:9px">색 · 집필 목표 주차</div>
+  <div class="sc"><i style="background:var(--s1)"></i><i style="background:var(--s2)"></i><i style="background:var(--s3)"></i><i style="background:var(--s4)"></i><i style="background:var(--s5)"></i></div>
+  <div class="scl"><span id="lgW0">W8</span><span id="lgW1">W28</span></div>
+</aside>
+
+<section class="card" id="inf" role="dialog" aria-label="선택한 절 정보">
+  <button class="x" id="infx" aria-label="닫기">×</button>
+  <div class="hd"><span class="id" id="iid"></span><span class="tt" id="itt"></span></div>
+  <div class="bd" id="ibd"></div>
+</section>
+
+<div class="card" id="ctl">
+  <div id="ctlT"><b>끌기</b> 회전 · <b>휠</b> 확대 · <b>클릭</b> 선택</div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<nav id="tog">
+  <button id="bAll" class="on" type="button">전체</button>
+  <button id="bSpine" type="button">분석 파이프라인</button>
+  <button id="bCube" type="button">데이터 큐브</button>
+</nav>
+
+<script>
+(function(){
+"use strict";
+
+/* ── 논문 목차 (phd-console index.html 의 TOC 배열에서 가져옴) ──
+   id · 계층(l) · 제목(t) · 집필 목표 주차(w) · 예상 쪽수(tp) */
+var TOC=[
+ ["1",1,"서론",21,0],["1.1",2,"연구의 배경 및 필요성",21,4],["1.2",2,"연구 목적 및 연구문제",21,2],
+ ["1.3",2,"연구 범위 및 방법",22,2],["1.4",2,"논문의 구성",22,1],
+ ["2",1,"이론적 배경 및 선행연구",11,0],
+ ["2.1",2,"대학 성과평가와 효율성의 개념",11,6],["2.1.1",3,"고등교육의 공공성과 경쟁성",11,0],
+ ["2.1.2",3,"대학기관평가인증과 대학현황지표",11,0],
+ ["2.2",2,"효율성 측정 방법론",12,8],["2.2.1",3,"자료포락분석(DEA): CCR·BCC 모형과 규모효율성",12,0],
+ ["2.2.2",3,"맘퀴스트 생산성지수",12,0],["2.2.3",3,"효율성 결정요인 분석: Tobit 및 부트스트랩 절단회귀",12,0],
+ ["2.3",2,"대학 효율성에 관한 선행연구",8,8],["2.3.1",3,"국내 연구",8,0],["2.3.2",3,"국외 연구",9,0],
+ ["2.4",2,"선행연구의 한계와 본 연구의 차별성",13,2],
+ ["3",1,"연구 설계",17,0],
+ ["3.1",2,"분석 자료 및 표본",17,12],["3.1.1",3,"자료 출처: 한국대학평가원 대학현황지표(2015~2025)",17,0],
+ ["3.1.2",3,"2주기·3주기 자료의 결합과 정합성 검증",17,0],["3.1.3",3,"표본 정제 및 관측치 구성",17,0],
+ ["3.1.4",3,"보완 자료의 수집·결합",19,0],
+ ["3.2",2,"변수의 정의",17,5],["3.2.1",3,"투입변수와 산출변수 (핵심 3×4 · 확장 4×5)",17,0],
+ ["3.2.2",3,"집단 구분 및 환경변수",17,0],
+ ["3.3",2,"분석 모형",18,6],["3.3.1",3,"1단계: DEA(CCR·BCC) 및 규모효율성",18,0],
+ ["3.3.2",3,"2단계: 맘퀴스트 생산성지수 분해",18,0],
+ ["3.3.3",3,"3단계: 효율성 결정요인 회귀(Tobit·Simar-Wilson)",18,0],
+ ["3.4",2,"연구가설",19,2],
+ ["4",1,"실증분석 결과",27,0],["4.1",2,"기술통계 및 상관분석",27,5],["4.2",2,"대학 효율성 분석 결과",27,12],
+ ["4.2.1",3,"기술효율성·순수기술효율성·규모효율성",27,0],["4.2.2",3,"설립유형·지역거점 여부별 효율성 비교",27,0],
+ ["4.3",2,"생산성 변화 분석: 2015~2025",27,8],["4.4",2,"효율성 결정요인 분석",27,10],
+ ["4.5",2,"강건성 검정",27,5],
+ ["5",1,"결론 및 정책적 시사점",28,0],["5.1",2,"연구 결과 요약",28,3],["5.2",2,"정책적 시사점",28,4],
+ ["5.3",2,"연구의 한계와 향후 과제",28,2]
+];
+/* ── 콘솔 연동 ──
+   ?embed=1 로 콘솔 안에 넣으면 부모 창(같은 출처)의 TOC·진행 상태를 직접 읽는다.
+   그래서 목차 화면에서 제목·주차·쪽수를 고치면 이 화면을 다시 열 때 그대로 반영된다.
+   부모에 접근할 수 없으면(단독 실행, 다른 출처) 위의 내장 목차를 쓴다. */
+var EMBED=/[?&]embed=1\b/.test(location.search);
+if(EMBED) document.body.classList.add("embed");
+var P=null;
+try{ if(window.parent!==window && window.parent.TOC && window.parent.TOC.length) P=window.parent; }catch(e){ P=null; }
+if(P){
+  try{
+    var live=P.TOC.filter(function(o){ return o && /^\d+(\.\d+)*$/.test(String(o.id)); })
+                  .map(function(o){ return [String(o.id), +o.l||2, String(o.t||""), +o.w||0, +o.tp||0]; });
+    if(live.length) TOC=live;
+  }catch(e){}
+}
+function pState(id){      /* 진행 상태 · 현재 쪽수 */
+  if(!P) return null;
+  try{
+    var st = P.tocSt ? P.tocSt(id) : (P.state.toc.st[id]||0);
+    var lab = P.TOC_ST ? P.TOC_ST[st] : null;
+    var pg = +(P.state && P.state.toc && P.state.toc.pg ? P.state.toc.pg[id] : 0) || 0;
+    return {st:st, lab:lab, n:(P.TOC_ST?P.TOC_ST.length:5), pg:pg};
+  }catch(e){ return null; }
+}
+
+/* 3단계 분석 파이프라인 — 모형 설계(3장)에서 결과(4장)로 이어지는 축 */
+var SPINE=["3.3.1","4.2","3.3.2","4.3","3.3.3","4.4"];
+var SPINE_SET={}; SPINE.forEach(function(k){SPINE_SET[k]=1;});
+var NOTE={
+ "3.3.1":"투입 6 · 산출 4. CCR(CRS)과 BCC(VRS)를 함께 추정해 규모효율성 SE = CRS/VRS 로 분해한다.",
+ "3.3.2":"인접기간 맘퀴스트 지수를 효율성변화(EC)와 기술변화(TC)로 분해한다. 2015~2025 전 기간.",
+ "3.3.3":"Tobit 과 Simar-Wilson 부트스트랩 절단회귀를 병행. 1단계 투입·산출은 설명변수로 재사용하지 않는다.",
+ "4.2":"1단계 산출물. 기술효율성·순수기술효율성·규모효율성과 설립유형·지역거점별 비교.",
+ "4.3":"2단계 산출물. 생산성 변화의 동태적 분해.",
+ "4.4":"3단계 산출물. 효율성 격차를 설명하는 구조·환경·정책 요인.",
+ "3.1":"한국대학평가원 대학현황지표 2주기(2015~2017)+3주기(2018~2025) 결합. 정제 내역 835건.",
+ "3.2":"핵심 3×4 · 확장 4×5 명세. 집단 구분과 환경변수는 분리가능성 조건에 따라 2단계에서만 쓴다.",
+ "2.2":"DEA 계보 · 맘퀴스트 · 2단계 회귀의 방법론적 근거.",
+ "2.3":"국내 연구와 국외 연구. 본 논문의 직접 비교 대상."
+};
+
+/* 집필 목표 주차 범위 — 목차에서 계산 */
+var WS=TOC.map(function(r){return r[3];}).filter(function(w){return w>0;});
+var W0=WS.length?Math.min.apply(null,WS):8, W1=WS.length?Math.max.apply(null,WS):28;
+if(W1<=W0) W1=W0+1;
+var SEQ=[0xDCEBE8,0xA9D2CA,0x6FB5A9,0x358E81,0x0F5F58];
+function wColor(w){
+  var t=Math.max(0,Math.min(1,(w-W0)/(W1-W0)));
+  var i=Math.min(SEQ.length-2,Math.floor(t*(SEQ.length-1)));
+  var f=t*(SEQ.length-1)-i, a=new THREE.Color(SEQ[i]), b=new THREE.Color(SEQ[i+1]);
+  return a.lerp(b,f);
+}
+
+/* ── 장면 ── */
+var VOID=0x0B0C0D, BONE=0xEDE8DF, GOLD=0xC9A227;
+var cv=document.getElementById("cv");
+var renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+var scene=new THREE.Scene();
+scene.background=new THREE.Color(VOID);
+scene.fog=new THREE.Fog(VOID,46,124);
+var camera=new THREE.PerspectiveCamera(46,1,0.1,400);
+
+scene.add(new THREE.AmbientLight(0xBFD6D1,0.62));
+var key=new THREE.DirectionalLight(0xFFF6E2,0.85); key.position.set(16,26,14); scene.add(key);
+var rim=new THREE.DirectionalLight(0x4FA99A,0.4); rim.position.set(-15,-6,-12); scene.add(rim);
+
+var root=new THREE.Group(); scene.add(root);
+var gAll=new THREE.Group(), gSpine=new THREE.Group(), gCube=new THREE.Group();
+root.add(gAll); root.add(gSpine); root.add(gCube);
+
+/* 장별 그룹화 — 장 수가 바뀌어도(6장 추가 등) 따라간다 */
+var chapters=[];
+TOC.forEach(function(r){ var c=parseInt(r[0].split(".")[0],10); if(!(c>=1)) return; (chapters[c-1]=chapters[c-1]||[]).push(r); });
+chapters=chapters.filter(function(x){return x&&x.length;});
+function headOf(rows){ for(var i=0;i<rows.length;i++) if(rows[i][1]===1) return rows[i]; return rows[0]; }
+
+var LAYER=7.6;            /* 장 간 높이 */
+var MIDY=(chapters.length-1)*LAYER/2;                 /* 쌓인 단의 가운데 높이 */
+var CUBE_Y=Math.round((chapters.length-1)/2)*LAYER;   /* 큐브를 붙일 단 */
+(function(){
+  var nSec=TOC.filter(function(r){return r[1]===2;}).length, nSub=TOC.filter(function(r){return r[1]>=3;}).length;
+  var set=function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+  set("stCh",chapters.length); set("stSec",nSec+nSub); set("lgCh",chapters.length); set("lgSec",nSec); set("lgSub",nSub);
+  set("lgW0","W"+W0); set("lgW1","W"+W1);
+})();
+var nodes=[];             /* {mesh,rec,pos,kind} */
+var pos={};               /* id -> Vector3 */
+
+/* 파이프라인은 기본 시점을 정면으로 향하게 놓는다.
+   각 단계의 모형(3장 항)과 결과(4장 절)가 같은 방위각에 서서 수직 가로대를 이룬다. */
+var TH0=0.86;                              /* 기본 카메라 방위 */
+var CAM_A=Math.PI/2-TH0;                   /* 카메라가 선 방위각 */
+/* 사다리를 정면(=중앙 기둥과 겹침)이 아니라 비스듬히 옆에 세운다 */
+var FRONT=CAM_A+0.82;
+var SPREAD=0.56, SP_R=8.05;
+var CUBE_A=CAM_A-1.3;                      /* 큐브는 사다리 반대편 */
+/* 정면에서 볼 때 1단계가 왼쪽에 오도록 방위각 증가 방향으로 배치 */
+var PIN={"3.3":[FRONT,5.5],
+         "3.3.1":[FRONT+SPREAD,SP_R],"3.3.2":[FRONT,SP_R],"3.3.3":[FRONT-SPREAD,SP_R],
+         "4.2":[FRONT+SPREAD,SP_R],"4.3":[FRONT,SP_R],"4.4":[FRONT-SPREAD,SP_R]};
+var STAGE=[["3.3.1","4.2","1단계 · DEA"],["3.3.2","4.3","2단계 · 맘퀴스트"],["3.3.3","4.4","3단계 · 결정요인"]];
+
+/* 고정되지 않은 절은 파이프라인 반대편 호에 고르게 배치 */
+function ringAngles(secs,ci){
+  var pinned=secs.filter(function(s){return PIN[s[0]];});
+  var free=secs.filter(function(s){return !PIN[s[0]];});
+  var out={};
+  pinned.forEach(function(s){out[s[0]]=PIN[s[0]];});
+  if(!pinned.length){
+    free.forEach(function(s,i){out[s[0]]=[(i/free.length)*Math.PI*2+FRONT+0.3+ci*0.5,5.5];});
+  }else{
+    var a0=FRONT+0.95, a1=FRONT+Math.PI*2-0.95;
+    free.forEach(function(s,i){
+      var t=free.length===1?0.5:i/(free.length-1);
+      out[s[0]]=[a0+(a1-a0)*t,5.5];
+    });
+  }
+  return out;
+}
+
+chapters.forEach(function(rows,ci){
+  var y=ci*LAYER;
+  var secs=rows.filter(function(r){return r[1]===2;});
+  var ANG=ringAngles(secs,ci);
+
+  /* 장 단(壇) */
+  var rOut=8.4;
+  var disc=new THREE.Mesh(
+    new THREE.RingGeometry(rOut-0.09,rOut,96),
+    new THREE.MeshBasicMaterial({color:0x2A332F,side:THREE.DoubleSide,transparent:true,opacity:.85}));
+  disc.rotation.x=-Math.PI/2; disc.position.y=y; gAll.add(disc);
+  var fill=new THREE.Mesh(
+    new THREE.CircleGeometry(rOut,96),
+    new THREE.MeshBasicMaterial({color:0x101514,transparent:true,opacity:.42,side:THREE.DoubleSide}));
+  fill.rotation.x=-Math.PI/2; fill.position.y=y-0.02; gAll.add(fill);
+
+  /* 장 중심 노드 */
+  var head=headOf(rows);
+  var hm=new THREE.Mesh(new THREE.SphereGeometry(0.72,28,20),
+    new THREE.MeshStandardMaterial({color:BONE,roughness:.42,metalness:.12,
+      emissive:new THREE.Color(BONE).multiplyScalar(.10)}));
+  hm.position.set(0,y,0); gAll.add(hm);
+  pos[head[0]]=hm.position.clone();
+  nodes.push({mesh:hm,rec:head,kind:"ch"});
+
+  /* 절 — 링 배치 (파이프라인 절은 고정 방위) */
+  secs.forEach(function(s,si){
+    var a=ANG[s[0]][0], R=ANG[s[0]][1];
+    var p=new THREE.Vector3(Math.cos(a)*R,y,Math.sin(a)*R);
+    var rad=0.30+Math.sqrt(s[4]||1)*0.115;
+    var onSp=!!SPINE_SET[s[0]];
+    var m=new THREE.Mesh(new THREE.SphereGeometry(rad,26,18),
+      new THREE.MeshStandardMaterial({
+        color:onSp?GOLD:wColor(s[3]), roughness:onSp?.3:.5, metalness:onSp?.55:.1,
+        emissive:new THREE.Color(onSp?GOLD:wColor(s[3])).multiplyScalar(onSp?.42:.07)}));
+    m.position.copy(p); gAll.add(m);
+    pos[s[0]]=p.clone();
+    nodes.push({mesh:m,rec:s,kind:"sec"});
+
+    /* 장 중심 → 절 */
+    gAll.add(line(new THREE.Vector3(0,y,0),p,0x2E3A36,.55));
+
+    /* 항 — 절 바깥쪽 위성 */
+    var subs=rows.filter(function(r){return r[1]===3 && r[0].indexOf(s[0]+".")===0;});
+    subs.forEach(function(sb,bi){
+      var sp;
+      if(PIN[sb[0]]){
+        var pa=PIN[sb[0]][0], pr=PIN[sb[0]][1];
+        sp=new THREE.Vector3(Math.cos(pa)*pr,y,Math.sin(pa)*pr);
+      }else{
+        var sa=a+(bi-(subs.length-1)/2)*0.22, sr=R+2.3;
+        sp=new THREE.Vector3(Math.cos(sa)*sr,y+0.42,Math.sin(sa)*sr);
+      }
+      var sOn=!!SPINE_SET[sb[0]];
+      var sm=new THREE.Mesh(new THREE.SphereGeometry(sOn?0.30:0.20,20,14),
+        new THREE.MeshStandardMaterial({
+          color:sOn?GOLD:0xA9D2CA, roughness:sOn?.3:.6, metalness:sOn?.55:.05,
+          emissive:new THREE.Color(sOn?GOLD:0xA9D2CA).multiplyScalar(sOn?.42:.05)}));
+      sm.position.copy(sp); gAll.add(sm);
+      pos[sb[0]]=sp.clone();
+      nodes.push({mesh:sm,rec:sb,kind:"sub"});
+      gAll.add(line(p,sp,sOn?0x6A5417:0x27302D,sOn?.85:.42));
+    });
+  });
+
+  /* 장 사이 기둥 */
+  if(ci>0) gAll.add(line(new THREE.Vector3(0,y-LAYER,0),new THREE.Vector3(0,y,0),0x39443F,.7));
+});
+
+function line(a,b,col,op){
+  var g=new THREE.BufferGeometry().setFromPoints([a,b]);
+  return new THREE.Line(g,new THREE.LineBasicMaterial({color:col,transparent:true,opacity:op}));
+}
+
+/* ── 3단계 파이프라인 — 사다리 구조 ──
+   가로대(수직) : 각 단계의 모형(3장) → 결과(4장)
+   레일(수평)   : 1단계 → 2단계 → 3단계 의 순서. 3장 층과 4장 층에 하나씩 */
+var goldMat=new THREE.MeshStandardMaterial({color:GOLD,roughness:.28,metalness:.7,
+  emissive:new THREE.Color(GOLD).multiplyScalar(.5)});
+function tubeAlong(pts,r,seg){
+  var c=new THREE.CatmullRomCurve3(pts,false,"catmullrom",0.5);
+  var m=new THREE.Mesh(new THREE.TubeGeometry(c,seg||64,r,10,false),goldMat);
+  var h=new THREE.Mesh(new THREE.TubeGeometry(c,seg||64,r*3.4,8,false),
+    new THREE.MeshBasicMaterial({color:GOLD,transparent:true,opacity:.05}));
+  gSpine.add(m); gSpine.add(h);
+}
+/* 가로대 */
+STAGE.forEach(function(st){
+  var a=pos[st[0]], b=pos[st[1]]; if(!a||!b) return;
+  tubeAlong([a,b],0.075,24);
+});
+/* 레일 — 단 위를 따라 휘도록 중간점을 원호 위에 둔다 */
+function railOn(ids){
+  var ps=ids.map(function(k){return pos[k];}); if(ps.some(function(p){return !p;})) return;
+  var y=ps[0].y, pts=[];
+  for(var i=0;i<ps.length-1;i++){
+    var a0=Math.atan2(ps[i].z,ps[i].x), a1=Math.atan2(ps[i+1].z,ps[i+1].x);
+    for(var k=0;k<8;k++){ var t=k/8, ang=a0+(a1-a0)*t; pts.push(new THREE.Vector3(Math.cos(ang)*SP_R,y,Math.sin(ang)*SP_R)); }
+  }
+  pts.push(ps[ps.length-1].clone());
+  tubeAlong(pts,0.045,80);
+}
+railOn(["3.3.1","3.3.2","3.3.3"]);
+railOn(["4.2","4.3","4.4"]);
+
+/* ── 패널 데이터 큐브 · 190개교 × 11년 × 300변수 ── */
+(function(){
+  var g=new THREE.Group(); g.position.set(Math.cos(CUBE_A)*13.6,CUBE_Y+0.6,Math.sin(CUBE_A)*13.6);
+  var S=4.3;
+  var box=new THREE.Mesh(new THREE.BoxGeometry(S,S,S),
+    new THREE.MeshStandardMaterial({color:0x1A6157,transparent:true,opacity:.11,
+      roughness:.9,side:THREE.DoubleSide}));
+  g.add(box);
+  var edge=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(S,S,S)),
+    new THREE.LineBasicMaterial({color:0x6FB5A9,transparent:true,opacity:.75}));
+  g.add(edge);
+  /* 연도 11개 슬라이스 */
+  for(var i=1;i<11;i++){
+    var y=-S/2+S*(i/11);
+    var pl=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(S,S)),
+      new THREE.LineBasicMaterial({color:0x358E81,transparent:true,opacity:.17}));
+    pl.rotation.x=-Math.PI/2; pl.position.y=y; g.add(pl);
+  }
+  /* 관측 점구름 — 2,049 중 유효 1,731 을 밀도로 */
+  var N=760, geo=new THREE.BufferGeometry(), arr=new Float32Array(N*3);
+  for(var k=0;k<N;k++){
+    arr[k*3]=(Math.random()-.5)*S*.93;
+    arr[k*3+1]=(Math.random()-.5)*S*.93;
+    arr[k*3+2]=(Math.random()-.5)*S*.93;
+  }
+  geo.setAttribute("position",new THREE.BufferAttribute(arr,3));
+  g.add(new THREE.Points(geo,new THREE.PointsMaterial({color:0xA9D2CA,size:.055,transparent:true,opacity:.5})));
+  g.userData.cube=true; gCube.add(g);
+  gCube.add(line(new THREE.Vector3(Math.cos(CUBE_A)*8.4,CUBE_Y,Math.sin(CUBE_A)*8.4),
+                 new THREE.Vector3(Math.cos(CUBE_A)*11.4,CUBE_Y+0.6,Math.sin(CUBE_A)*11.4),0x39443F,.5));
+  window.__cubeG=g;
+})();
+
+/* ── 라벨 ── */
+var labRoot=document.getElementById("lab");
+var labels=[];
+function addLabel(text,cls,p){
+  var d=document.createElement("div"); d.className="lb "+cls; d.textContent=text;
+  labRoot.appendChild(d); labels.push({el:d,p:p,cls:cls});
+}
+chapters.forEach(function(rows,ci){
+  var h=headOf(rows);
+  addLabel("제"+h[0].split(".")[0]+"장  "+(h[1]===1?h[2]:""),"ch",new THREE.Vector3(0,ci*LAYER+1.5,0));
+});
+TOC.forEach(function(r){
+  if(r[1]!==2) return;
+  var p=pos[r[0]]; if(!p) return;
+  var t=r[2].length>16?r[2].slice(0,15)+"…":r[2];
+  addLabel(r[0]+" "+t, SPINE_SET[r[0]]?"sp":"", p.clone().add(new THREE.Vector3(0,0.95,0)));
+});
+/* 레일 이름 — 파이프라인 보기에서만 */
+[["3.3.1","3장 · 분석 모형"],["4.2","4장 · 실증 결과"]].forEach(function(r){
+  var p=pos[r[0]]; if(!p) return;
+  var a=Math.atan2(p.z,p.x)+0.30;
+  addLabel(r[1],"sp rail",new THREE.Vector3(Math.cos(a)*SP_R*1.06,p.y+0.05,Math.sin(a)*SP_R*1.06));
+});
+/* 단계 이름은 가로대 한가운데에 */
+STAGE.forEach(function(st){
+  var a=pos[st[0]], b=pos[st[1]]; if(!a||!b) return;
+  var m=a.clone().lerp(b,0.5);
+  m.x*=1.2; m.z*=1.2;                      /* 가로대 바깥쪽으로 */
+  addLabel(st[2],"sp stg",m);
+});
+addLabel("패널 데이터  190개교 × 11년 × 300변수","cube",
+  new THREE.Vector3(Math.cos(CUBE_A)*13.6,CUBE_Y+3.6,Math.sin(CUBE_A)*13.6));
+
+/* ── 카메라 궤도 (자체 구현) ── */
+var HOME={x:0,y:MIDY,z:0,r:40+chapters.length*2.4,ph:1.2};
+var tgt=new THREE.Vector3(HOME.x,HOME.y,HOME.z);
+var sph={r:HOME.r,th:TH0,ph:HOME.ph};
+/* 세로로 긴 화면에서는 수직 시야각이 고정이라 가로가 잘린다.
+   화면 비율에 따라 카메라를 뒤로 물려 폭을 확보한다. 사용자 확대(휠)는 sph.r 로 따로 유지 */
+var aspK=1, NARROW=false, VIEW="all";
+function applyCam(){
+  var R=sph.r*aspK;
+  camera.position.set(
+    tgt.x+R*Math.sin(sph.ph)*Math.sin(sph.th),
+    tgt.y+R*Math.cos(sph.ph),
+    tgt.z+R*Math.sin(sph.ph)*Math.cos(sph.th));
+  camera.lookAt(tgt);
+}
+var drag=false,px=0,py=0,moved=0;
+cv.addEventListener("pointerdown",function(e){drag=true;moved=0;px=e.clientX;py=e.clientY;cv.classList.add("drag");cv.setPointerCapture(e.pointerId);});
+cv.addEventListener("pointermove",function(e){
+  if(!drag) return;
+  var dx=e.clientX-px, dy=e.clientY-py; px=e.clientX; py=e.clientY;
+  moved+=Math.abs(dx)+Math.abs(dy);
+  sph.th-=dx*0.0052;
+  sph.ph=Math.max(0.16,Math.min(Math.PI-0.16,sph.ph-dy*0.0044));
+  applyCam();
+});
+function endDrag(e){ drag=false; cv.classList.remove("drag"); if(e&&e.pointerId!=null&&cv.hasPointerCapture&&cv.hasPointerCapture(e.pointerId)) cv.releasePointerCapture(e.pointerId); }
+cv.addEventListener("pointerup",endDrag); cv.addEventListener("pointercancel",endDrag);
+/* 콘솔 안에서는 그냥 휠을 굴리면 콘솔 페이지가 스크롤되게 둔다(입체도에 스크롤이 갇히지 않게).
+   확대는 Ctrl/⌘ + 휠. 트랙패드 두 손가락 벌리기는 ctrlKey 가 실려 오므로 그대로 확대된다 */
+var toast=document.getElementById("toast"), toastT=0;
+function hint(t){ toast.textContent=t; toast.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(function(){toast.classList.remove("on");},1300); }
+if(EMBED){ var ct=document.getElementById("ctlT"); if(ct) ct.innerHTML="<b>끌기</b> 회전 · <b>Ctrl+휠</b> 확대 · <b>클릭</b> 선택"; }
+cv.addEventListener("wheel",function(e){
+  if(EMBED && !(e.ctrlKey||e.metaKey)){ hint("Ctrl + 휠로 확대합니다"); return; }
+  e.preventDefault();
+  sph.r=Math.max(12,Math.min(96,sph.r*(1+Math.sign(e.deltaY)*0.09)));
+  applyCam();
+},{passive:false});
+/* 두 손가락 확대 */
+var pinch=null;
+cv.addEventListener("touchmove",function(e){
+  if(e.touches.length!==2) return;
+  var d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  if(pinch) { sph.r=Math.max(12,Math.min(96,sph.r*(pinch/d))); applyCam(); }
+  pinch=d;
+},{passive:true});
+cv.addEventListener("touchend",function(){pinch=null;});
+
+/* ── 선택 ── */
+var ray=new THREE.Raycaster(), mouse=new THREE.Vector2();
+var inf=document.getElementById("inf"), iid=document.getElementById("iid"),
+    itt=document.getElementById("itt"), ibd=document.getElementById("ibd");
+var sel=null;
+function kv(k,v){ return '<div class="kv"><span>'+k+'</span><b>'+v+'</b></div>'; }
+function escH(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+/* 문헌 지도가 가리키는 절 번호로 절별 문헌 수를 센다. 두 곳의 번호를 합친다.
+   · 영역 설명(areas.d) — A「2.2 …」 B「2.3.2 …」 C「2.3.1 …」 D「2.1 …」
+   · 묶음의 어디에 쓰나(groups.use) — 예) "2.2.3 · 3.3.3 주 추정방법의 근거"
+   묶음 번호만 쓰면 번호를 적지 않은 묶음(국외 B 영역 대부분, 국내 C3)이 통째로 빠져 2.3 이 과소 집계된다.
+   번호는 앞자리 일치로 올라간다: 2.3.2 를 가리키면 2.3 에도 잡힌다. 중복 등록(dup_of)은 뺀다.
+   콘솔 안에서만 — 단독 실행은 파일에 접근할 수 없다 */
+var LIT=null;
+if(P){
+  fetch("../../data/refs_themes.json").then(function(r){ return r.ok?r.json():null; }).then(function(d){
+    if(!d||!d.items||!d.groups) return;
+    var RE=/\b\d+\.\d+(?:\.\d+)?\b/g, refsOf={}, areaOf={};
+    (d.areas||[]).forEach(function(a){ areaOf[a.id]=String(a.d||"").match(RE)||[]; });
+    Object.keys(d.groups).forEach(function(k){ refsOf[k]=String(d.groups[k].use||"").match(RE)||[]; });
+    var cnt={};
+    Object.keys(d.items).forEach(function(id){
+      var it=d.items[id]; if(!it||it.dup_of) return;
+      var ids=(refsOf[it.theme]||[]).concat(areaOf[String(it.theme||"").charAt(0)]||[]);
+      TOC.forEach(function(r){
+        var S=r[0];
+        if(ids.some(function(x){ return x===S || x.indexOf(S+".")===0; })) cnt[S]=(cnt[S]||0)+1;
+      });
+    });
+    LIT=cnt;
+  }).catch(function(){});
+}
+
+function showInfo(n){
+  if(sel) sel.mesh.scale.setScalar(1);
+  sel=n; n.mesh.scale.setScalar(1.45);
+  var r=n.rec, lvl=r[1]===1?"장":(r[1]===2?"절":"항");
+  iid.textContent=r[0]; itt.textContent=r[2];
+  var h=kv("계층",lvl)+kv("집필 목표","W"+r[3]);
+  var ps=r[1]>=2?pState(r[0]):null;
+  if(ps && ps.lab){
+    h+='<div class="kv"><span>진행 상태</span><b>'+escH(ps.lab)+'</b></div>'+
+       '<div class="bar" aria-hidden="true"><i style="width:'+Math.round(ps.st/Math.max(1,ps.n-1)*100)+'%"></i></div>';
+  }
+  if(r[4]) h+=kv("쪽수", (ps&&ps.pg? ps.pg+" / " : "")+r[4]+"쪽"+(ps&&ps.pg?" (현재 / 예상)":" 예상"));
+  if(LIT && LIT[r[0]]) h+=kv("받치는 문헌",LIT[r[0]]+"편");
+  if(SPINE_SET[r[0]]) h+='<div class="kv"><span>역할</span><b style="color:var(--gold)">3단계 분석 파이프라인</b></div>';
+  if(NOTE[r[0]]) h+='<div class="note">'+NOTE[r[0]]+'</div>';
+  if(LIT && LIT[r[0]]) h+='<div class="note">문헌 수는 문헌 지도의 영역 설명이나 묶음의 「어디에 쓰나」가 이 번호(또는 하위 번호)를 가리키는 문헌이다. 중복 등록은 뺐다.</div>';
+  if(P && P.go) h+='<button class="go" type="button" id="goToc">목차 화면에서 열기 →</button>';
+  ibd.innerHTML=h; inf.classList.add("on");
+  var gb=document.getElementById("goToc");
+  if(gb) gb.addEventListener("click",function(){ try{ P.go("toc"); }catch(e){} });
+}
+function clearInfo(){ if(sel){sel.mesh.scale.setScalar(1); sel=null;} inf.classList.remove("on"); }
+document.getElementById("infx").addEventListener("click",clearInfo);
+cv.addEventListener("click",function(e){
+  if(moved>7) return;
+  var b=cv.getBoundingClientRect();
+  mouse.x=((e.clientX-b.left)/b.width)*2-1;
+  mouse.y=-((e.clientY-b.top)/b.height)*2+1;
+  ray.setFromCamera(mouse,camera);
+  var hit=ray.intersectObjects(nodes.map(function(n){return n.mesh;}),false);
+  if(hit.length){
+    for(var i=0;i<nodes.length;i++) if(nodes[i].mesh===hit[0].object){ showInfo(nodes[i]); return; }
+  }
+  clearInfo();
+});
+
+/* ── 보기 전환 ── */
+var bAll=document.getElementById("bAll"), bSp=document.getElementById("bSpine"), bCu=document.getElementById("bCube");
+function setView(v){
+  VIEW=v;
+  [bAll,bSp,bCu].forEach(function(b){b.classList.remove("on");});
+  gAll.visible=true; gSpine.visible=true; gCube.visible=true;
+  labels.forEach(function(l){ l.el.style.display = (l.cls.indexOf("rail")>=0 ? "none" : ""); });
+  if(v==="all"){ bAll.classList.add("on"); tgt.set(HOME.x,HOME.y,HOME.z); sph.r=HOME.r; sph.th=TH0; sph.ph=HOME.ph; }
+  if(v==="spine"){
+    bSp.classList.add("on"); gCube.visible=false;
+    /* 장 라벨은 가운데 가로대와 겹치므로 숨기고, 레일 이름으로 대신한다 */
+    labels.forEach(function(l){ l.el.style.display = (l.cls.indexOf("sp")>=0 ? "" : "none"); });
+    /* 사다리 번호가 목차에서 바뀌어 없어졌으면 3·4장 사이를 본다 */
+    var mid=(pos["3.3.2"]&&pos["4.3"]) ? pos["3.3.2"].clone().lerp(pos["4.3"],0.5)
+            : new THREE.Vector3(Math.cos(FRONT)*SP_R,2.5*LAYER,Math.sin(FRONT)*SP_R);
+    tgt.set(mid.x*0.62,mid.y,mid.z*0.62);
+    sph.r=24; sph.th=Math.PI/2-FRONT; sph.ph=1.42;   /* 사다리를 정면으로 */
+  }
+  if(v==="cube"){
+    bCu.classList.add("on"); gSpine.visible=false;
+    labels.forEach(function(l){ if(l.cls!=="cube") l.el.style.display="none"; });
+    tgt.copy(window.__cubeG.position); sph.r=17; sph.ph=1.15;
+  }
+  clearInfo(); applyCam();
+}
+bAll.addEventListener("click",function(){setView("all");});
+bSp.addEventListener("click",function(){setView("spine");});
+bCu.addEventListener("click",function(){setView("cube");});
+setView("all");
+
+/* ── 루프 ── */
+var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+var v2=new THREE.Vector3();
+function resize(){
+  var w=innerWidth,h=innerHeight, a=w/h;
+  /* updateStyle=true — canvas 는 대체 요소라 CSS inset 만으로 늘어나지 않는다.
+     스타일 크기를 명시하지 않으면 고해상도 화면에서 그리기 버퍼 크기(×픽셀비율)로 표시되어
+     라벨과 형상이 어긋난다 */
+  renderer.setSize(w,h,true); camera.aspect=a; camera.updateProjectionMatrix();
+  aspK = a>=1.25 ? 1 : Math.min(2.5,Math.pow(1.25/a,0.82));
+  /* 카메라를 물린 만큼 안개도 밀어야 형상이 묻히지 않는다 */
+  scene.fog.near=46*aspK; scene.fog.far=124*aspK;
+  NARROW = w<700;
+  applyCam();
+}
+addEventListener("resize",resize); resize();
+
+var t0=performance.now();
+function frame(){
+  requestAnimationFrame(frame);
+  if(!reduce && window.__cubeG && gCube.visible) window.__cubeG.rotation.y=(performance.now()-t0)*0.00013;
+  renderer.render(scene,camera);
+  /* 라벨 투영 — 단의 뒤편에 있는 라벨은 흐리게 해 앞 라벨과 겹치지 않게 한다 */
+  var w=innerWidth,h=innerHeight;
+  var cx=camera.position.x-tgt.x, cz=camera.position.z-tgt.z, cl=Math.hypot(cx,cz)||1; cx/=cl; cz/=cl;
+  for(var i=0;i<labels.length;i++){
+    var L=labels[i];
+    v2.copy(L.p).project(camera);
+    if(v2.z>1){ L.el.style.opacity=0; continue; }
+    var op;
+    /* 좁은 화면의 전체 보기는 장 라벨만 — 나머지는 겹쳐서 읽히지 않는다 */
+    if(NARROW && VIEW==="all" && L.cls!=="ch"){ L.el.style.opacity=0; continue; }
+    /* 좁은 화면의 파이프라인 보기는 단계·레일 라벨만 — 4.2·4.3·4.4 절 제목은 서로 겹친다 */
+    if(NARROW && VIEW==="spine" && L.cls==="sp"){ L.el.style.opacity=0; continue; }
+    if(L.cls==="ch"||L.cls==="cube"){ op=1; }
+    else{
+      var lx=L.p.x, lz=L.p.z, ll=Math.hypot(lx,lz)||1;
+      var facing=(lx*cx+lz*cz)/ll;          /* 1=정면, -1=뒤편 */
+      var near=Math.max(0,Math.min(1,(64-camera.position.distanceTo(L.p)/aspK)/24));
+      op=near*Math.max(0,Math.min(1,(facing+0.35)/0.7));
+      if(L.cls.indexOf("sp")>=0) op=Math.max(op,0.85*near);
+    }
+    L.el.style.opacity=op;
+    L.el.style.left=((v2.x*.5+.5)*w)+"px";
+    L.el.style.top=((-v2.y*.5+.5)*h)+"px";
+  }
+}
+frame();
+})();
+</script>
+
+</body>
+</html>

@@ -244,6 +244,11 @@ a.abtn.primary{color:var(--on-accent)}
 .mapfig{margin:12px 0 14px; display:flex; justify-content:center}
 .mapfig img{width:100%; max-width:720px; height:auto; background:#fff; border:1px solid var(--line); border-radius:var(--r-s)}
 .mapnote{margin-top:10px}
+/* 입체도 — 3D 뷰어는 테마와 관계없이 어두운 허공 위에 그린다 */
+.modelwrap{position:relative; height:min(74vh,760px); min-height:420px; border-radius:var(--r-m);
+  overflow:hidden; border:1px solid var(--line); background:#0B0C0D}
+.modelwrap iframe{position:absolute; inset:0; width:100%; height:100%; border:0; display:block}
+@media (max-width:700px){ .modelwrap{height:66vh; min-height:380px} }
 ul.fbl{margin:0; padding-left:15px}
 ul.fbl li{margin:2px 0; line-height:1.5}
 table.fbt td{vertical-align:top}
@@ -545,6 +550,7 @@ table.dt td.dim{color:var(--ink-3); font-size:11.5px}
     <button class="navb" data-go="report"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 12v5"/><path d="m9.5 14.5 2.5-2.5 2.5 2.5"/></svg><span>진행 현황</span><span class="cnt" id="cntRep"></span></button>
     <button class="navb" data-go="feedback"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/><path d="m8.5 10 2.2 2.2L15.5 7.5"/></svg><span>피드백</span><span class="cnt" id="cntFb"></span></button>
     <button class="navb" data-go="map"><svg viewBox="0 0 24 24"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span>지도</span><span class="cnt" id="cntMap"></span></button>
+    <button class="navb" data-go="model"><svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg><span>입체도</span><span class="cnt" id="cntModel"></span></button>
     <div class="railfoot">
       <div class="railprog">
         <span class="pl"><span id="rpL">36주 진행</span><span id="rpR"></span></span>
@@ -745,7 +751,8 @@ var SCREENS = {
   refs: {title:"문헌", render:scRefs},
   report:{title:"진행 현황", render:scReport},
   feedback:{title:"피드백 반영", render:scFeedback},
-  map:{title:"공간 분석 지도", render:scMap}
+  map:{title:"공간 분석 지도", render:scMap},
+  model:{title:"구조 입체도", render:scModel}
 };
 function go(name, push){
   if(!SCREENS[name]) name = "today";
@@ -774,6 +781,7 @@ function meta(){
   var cr = document.getElementById("cntRefs"); if(cr) cr.textContent = allRefs().length ? allRefs().length + "편" : "";
   var cp = document.getElementById("cntRep"); if(cp) cp.textContent = REPORT.ver;
   var cm = document.getElementById("cntMap"); if(cm) cm.textContent = MAPDATA.maps.length + "장";
+  var cz = document.getElementById("cntModel"); if(cz) cz.textContent = "3D";
   var cf = document.getElementById("cntFb"); if(cf) cf.textContent = FEEDBACK.items.filter(function(x){ return x[6] === "완료"; }).length + "/" + FEEDBACK.items.length;
   document.getElementById("rpR").textContent = "W" + pad(NOWW) + " · " + T.pct + "%";
   document.getElementById("rpBar").style.width = (NOWW/36*100) + "%";
@@ -2301,6 +2309,44 @@ NAVLIST.addEventListener("pointerup", dragEnd);
 NAVLIST.addEventListener("pointercancel", dragEnd);
 
 document.getElementById("skipLink").addEventListener("click", function(e){ e.preventDefault(); document.getElementById("screen").focus(); });
+
+/* ===================== 입체도 ===================== */
+/* docs/model/thesis3d.html 을 iframe 으로 싣는다. 같은 출처라 입체도가 이 창의 TOC·진행 상태·쪽수를
+   직접 읽으므로, 목차 화면에서 고친 내용이 이 화면을 다시 열 때 그대로 반영된다.
+   화면을 떠나면 #screen 이 다시 그려지면서 iframe 과 WebGL 이 함께 정리된다. */
+function modelFull(){
+  var f = document.getElementById("modelFrame"); if(!f) return;
+  var r = f.requestFullscreen || f.webkitRequestFullscreen; if(r) r.call(f);
+}
+function scModel(){
+  var T = tocTotals();
+  var nCh = TOC.filter(function(x){ return x.l === 1; }).length;
+  var nS  = TOC.filter(function(x){ return x.l >= 2; }).length;
+  var M = TD && TD.meta ? TD.meta : null;
+  var h = '<section class="stats">' +
+    tile("장", nCh + "", "아래에서 위로 쌓인 단", "") +
+    tile("절·항", nS + "", "완료 " + T.done + " / 말단 " + T.n, "") +
+    tile("분석 단계", "3", "DEA → 맘퀴스트 → 결정요인", "accv") +
+    tile("패널", (M ? M.schools : 190) + "교", (M ? M.years.length : 11) + "년 × " + (M ? M.vars : 300) + "변수", "") +
+    '</section>';
+  h += '<section class="panel lift"><div class="panel-hd"><h2>논문 구조 입체도</h2>' +
+    '<p class="hint">목차·진행 상태를 이 콘솔에서 바로 읽음 · 끌기 회전 · Ctrl+휠 확대 · 구를 눌러 선택</p>' +
+    '<div class="actions"><button class="abtn" type="button" onclick="modelFull()">전체 화면</button></div></div>' +
+    '<div class="panel-bd"><div class="modelwrap">' +
+    '<iframe id="modelFrame" src="docs/model/thesis3d.html?embed=1" title="논문 구조 입체도 — 장·절·항과 3단계 분석 파이프라인" allow="fullscreen" allowfullscreen></iframe>' +
+    '</div></div></section>';
+  h += '<section class="panel"><div class="panel-hd"><h2>읽는 법</h2><p class="hint">무엇이 정보이고 무엇이 배치인가</p></div><div class="panel-bd"><ul class="fbl">' +
+    '<li><b>높이</b> — 장의 순서. 제1장이 맨 아래, 마지막 장이 맨 위.</li>' +
+    '<li><b>색</b> — 집필 목표 주차. 연한 청록이 이르고 진한 청록이 늦다.</li>' +
+    '<li><b>크기</b> — 예상 쪽수. 항은 쪽수가 없어 같은 작은 크기로 그린다.</li>' +
+    '<li><b>금빛 사다리</b> — 가로대는 각 분석 단계의 모형(3.3.1~3.3.3)이 결과(4.2~4.4)로 이어지는 길, 레일은 1→2→3단계의 순서.</li>' +
+    '<li><b>구를 누르면</b> — 진행 상태, 현재/예상 쪽수, 문헌 지도에서 그 절을 받치는 문헌 수가 나온다.</li>' +
+    '<li><b>의미 없는 것</b> — 같은 단 안에서 절이 놓인 둥근 위치는 겹치지 않게 늘어놓은 것뿐이다. 큐브 안 점구름은 밀도를 보여주는 장식이며 실제 관측치가 아니다.</li>' +
+    '<li><b>목차를 고치면</b> — 이 화면을 다시 열 때 반영된다. 사다리 번호(3.3.1~3.3.3·4.2~4.4)를 바꾸면 사다리는 그 부분을 그리지 않는다.</li>' +
+    '</ul></div></section>';
+  return h;
+}
+/* ===================== 입체도 끝 ===================== */
 
 /* ===================== 부팅 ===================== */
 load();
