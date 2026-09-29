@@ -43,6 +43,7 @@ DATA = {
     'lisa': S['LISA 군집(p < 0.05)'],
     'hub': S['거점국립대 거리–평균 CCR 순위상관(비거점)'],
     'hub2': S['같은 상관(비수도권 비거점)'],
+    'pos': S['위치의 정밀도'],
     'moran': moran,
     'bins': [[str(r['거리 구간']), int(r['대학수']), round(r['평균CCR'], 3), round(r['평균BCC'], 3)] for _, r in B.iterrows()],
     'sig': [[r['학교명'], r['지역'], r['군집'], round(r['CCR'], 3), round(r['p'], 3)] for _, r in sig.iterrows()],
@@ -70,7 +71,7 @@ function mapShow(i){
 function scMap(){
   var D = MAPDATA, h = "";
   h += '<section class="stats">' +
-    tile("대학", D.n + "교", "2015~2024 효율성이 있는 대학 (위치는 190교 전원 확인)", "") +
+    tile("대학", D.n + "교", "2015~2024 효율성이 있는 대학 · 실제 캠퍼스 좌표", "") +
     tile("Moran\'s I", D.global.split(" ")[0], "대학별 평균 CCR · " + D.global.replace(/^\S+\s*/, ""), "accv") +
     tile("연도별 검정", D.tests[0] + "/" + D.tests[1], "유의(p < 0.05) — 우연 수준 약 " + Math.round(D.tests[1] * 0.05) + "개", "") +
     tile("LISA 군집", D.lisa.replace(/[^0-9 ]/g, "").trim().split(/\s+/).reduce(function(a, b){ return a + (+b || 0); }, 0) + "교", D.lisa, "") +
@@ -87,7 +88,7 @@ function scMap(){
     '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
     '<path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>지도 내려받기</a>' +
     '<span class="fname" id="mapDlName">' + esc(D.maps[0][2]) + ' · ' + D.maps[0][3] + '</span></div>' +
-    '<p class="hint mapnote">※ 위치는 교육지원청 중심점(광역시는 시 전체)이고, 같은 구역의 대학은 해바라기 배치로 펼쳐 찍어 실제 캠퍼스 위치와 다릅니다.</p>' +
+    '<p class="hint mapnote">※ ' + esc(D.pos) + '. 지도 자료 © OpenStreetMap 기여자, Wikidata.</p>' +
     '</div></section>';
 
   h += '<div class="dgrid">';
@@ -122,7 +123,7 @@ function scMap(){
     '<li><b>결론</b> — 가까운 대학끼리 효율성이 닮지 않는다. 시도 평균을 빼도 같고, 거점국립대와의 거리도 효율성과 무관하다.</li>' +
     '<li><b>논문에서</b> — 효율성 격차가 개별 대학에서 온다는 예비분석(71.8%)을 실제 거리로 재확인. 연구문제 3 재설정(확인 요청 아홉째)의 근거.</li>' +
     '<li><b>방법론</b> — Simar–Wilson 2단계의 관측치 독립 가정을 지지한다. 공간회귀(SAR·SDM)는 본 분석보다 제4장 강건성 한 문단으로.</li>' +
-    '<li><b>한계</b> — 교육지원청 중심점 기준. 본문에 실으려면 실제 주소 좌표로 다시 계산(좌표 변환 API 키 필요).</li>' +
+    '<li><b>위치</b> — 캠퍼스 실제 좌표(OpenStreetMap 184교 · Wikidata 6교, EPSG:5186). 교육지원청 중심점으로 계산했을 때와 결론이 같다.</li>' +
     '</ul><div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">' +
     D.files.map(function(f){ return '<div class="dlrow"><a class="abtn" href="' + f[1] + '" download="' + f[2] + '">' + esc(f[0]) + ' 내려받기</a><span class="fname">' + esc(f[2]) + ' · ' + f[3] + '</span></div>'; }).join("") +
     '</div></div></section>';
