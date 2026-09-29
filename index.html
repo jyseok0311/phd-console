@@ -200,6 +200,12 @@ a.abtn{display:inline-flex; align-items:center; gap:7px; text-decoration:none; c
 a.abtn.primary{color:var(--on-accent)}
 .dlrow{display:flex; gap:14px; align-items:center; flex-wrap:wrap}
 .dlrow .fname{font-family:var(--f-mono); font-size:11.5px; color:var(--ink-3)}
+.mapsw{display:flex; gap:8px; flex-wrap:wrap}
+.mapsw .abtn[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent-line); color:var(--accent-ink); font-weight:600}
+.mapcap{margin:10px 0 0; font-size:var(--t-xs); color:var(--ink-3)}
+.mapfig{margin:12px 0 14px; display:flex; justify-content:center}
+.mapfig img{width:100%; max-width:720px; height:auto; background:#fff; border:1px solid var(--line); border-radius:var(--r-s)}
+.mapnote{margin-top:10px}
 ul.fbl{margin:0; padding-left:15px}
 ul.fbl li{margin:2px 0; line-height:1.5}
 table.fbt td{vertical-align:top}
@@ -476,6 +482,7 @@ table.dt td.dim{color:var(--ink-3); font-size:11.5px}
     <button class="navb" data-go="refs"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h5"/></svg><span>문헌</span><span class="cnt" id="cntRefs"></span></button>
     <button class="navb" data-go="report"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 12v5"/><path d="m9.5 14.5 2.5-2.5 2.5 2.5"/></svg><span>진행 현황</span><span class="cnt" id="cntRep"></span></button>
     <button class="navb" data-go="feedback"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/><path d="m8.5 10 2.2 2.2L15.5 7.5"/></svg><span>피드백</span><span class="cnt" id="cntFb"></span></button>
+    <button class="navb" data-go="map"><svg viewBox="0 0 24 24"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span>지도</span><span class="cnt" id="cntMap"></span></button>
     <div class="railfoot">
       <div class="railprog">
         <span class="pl"><span id="rpL">36주 진행</span><span id="rpR"></span></span>
@@ -664,7 +671,8 @@ var SCREENS = {
   toc:  {title:"논문 목차", render:scToc},
   refs: {title:"문헌", render:scRefs},
   report:{title:"진행 현황", render:scReport},
-  feedback:{title:"피드백 반영", render:scFeedback}
+  feedback:{title:"피드백 반영", render:scFeedback},
+  map:{title:"공간 분석 지도", render:scMap}
 };
 function go(name, push){
   if(!SCREENS[name]) name = "today";
@@ -691,6 +699,7 @@ function meta(){
   var ct = document.getElementById("cntToc"); if(ct){ var T2 = tocTotals(); ct.textContent = T2.done + "/" + T2.n; }
   var cr = document.getElementById("cntRefs"); if(cr) cr.textContent = allRefs().length ? allRefs().length + "편" : "";
   var cp = document.getElementById("cntRep"); if(cp) cp.textContent = REPORT.ver;
+  var cm = document.getElementById("cntMap"); if(cm) cm.textContent = MAPDATA.maps.length + "장";
   var cf = document.getElementById("cntFb"); if(cf) cf.textContent = FEEDBACK.items.filter(function(x){ return x[6] === "완료"; }).length + "/" + FEEDBACK.items.length;
   document.getElementById("rpR").textContent = "W" + pad(NOWW) + " · " + T.pct + "%";
   document.getElementById("rpBar").style.width = (NOWW/36*100) + "%";
@@ -1985,6 +1994,83 @@ function scFeedback(){
   h += '</tbody></table></div></div></section>';
   return h;
 }
+
+/* ===================== 지도 (docs/_지도메뉴_패치.py 가 생성) ===================== */
+var MAPDATA = {"updated": "2026. 9. 29.", "n": 182, "global": "-0.048 (p 0.263)", "tests": [4, 90], "range": [-0.15, 0.07], "lisa": "고-저 4 · 고-고 2 · 저-저 1", "hub": "0.063 (p 0.410, n 173)", "hub2": "0.044 (p 0.657, n 106)", "moran": [["반경 30km", "BCC", -0.055, -0.093, -0.009, 1, 10], ["반경 30km", "CCR", -0.024, -0.065, 0.017, 0, 10], ["반경 30km", "CCR − 시도 평균", -0.06, -0.155, -0.001, 1, 10], ["반경 50km", "BCC", 0.017, -0.028, 0.067, 1, 10], ["반경 50km", "CCR", 0.002, -0.019, 0.043, 0, 10], ["반경 50km", "CCR − 시도 평균", -0.028, -0.083, -0.007, 1, 10], ["최근접 6개", "BCC", -0.039, -0.08, -0.004, 0, 10], ["최근접 6개", "CCR", -0.025, -0.062, 0.011, 0, 10], ["최근접 6개", "CCR − 시도 평균", -0.06, -0.082, -0.026, 0, 10]], "bins": [["10km 이내", 38, 0.768, 0.822], ["10~30km", 21, 0.705, 0.827], ["30~60km", 36, 0.807, 0.835], ["60km 초과", 78, 0.773, 0.828]], "sig": [["서울시립대학교", "서울", "고-고", 0.802, 0.025], ["한국외국어대학교", "서울", "고-고", 0.85, 0.041], ["전남대학교", "광주", "고-저", 0.821, 0.044], ["인천대학교", "인천", "고-저", 0.848, 0.042], ["인하대학교", "인천", "고-저", 0.942, 0.024], ["영남대학교", "경북", "고-저", 0.986, 0.034], ["대구한의대학교", "경북", "저-저", 0.762, 0.028]], "maps": [["지도 1 · 대학별 평균 효율성", "docs/maps/map-efficiency.png", "박사학위논문_지도1_평균효율성.png", "549KB", "DEA(투입 3 × 산출 4) CCR 의 2015~2024년 대학별 평균을 다섯 구간 색으로"], ["지도 2 · LISA 국지 군집", "docs/maps/map-lisa.png", "박사학위논문_지도2_LISA군집.png", "551KB", "최근접 6개 이웃 기준, 순열 999회로 유의(p < 0.05)한 대학만 색으로"]], "files": [["검정 결과 (엑셀)", "docs/maps/spatial-prelim.xlsx", "예비분석_공간의존성.xlsx", "40KB"], ["지도 점 자료 (CSV)", "docs/maps/points.csv", "대학점.csv", "36KB"]]};
+
+function mapShow(i){
+  var M = MAPDATA.maps[i], img = document.getElementById("mapImg");
+  if(!img) return;
+  img.src = M[1]; img.alt = M[0];
+  document.getElementById("mapCap").textContent = M[4];
+  var a = document.getElementById("mapDl"); a.href = M[1]; a.setAttribute("download", M[2]);
+  document.getElementById("mapDlName").textContent = M[2] + " · " + M[3];
+  Array.prototype.forEach.call(document.querySelectorAll(".mapsw .abtn"), function(b, k){ b.setAttribute("aria-pressed", k === i ? "true" : "false"); });
+}
+
+function scMap(){
+  var D = MAPDATA, h = "";
+  h += '<section class="stats">' +
+    tile("대학", D.n + "교", "2015~2024 효율성이 있는 대학 (위치는 190교 전원 확인)", "") +
+    tile("Moran\'s I", D.global.split(" ")[0], "대학별 평균 CCR · " + D.global.replace(/^\S+\s*/, ""), "accv") +
+    tile("연도별 검정", D.tests[0] + "/" + D.tests[1], "유의(p < 0.05) — 우연 수준 약 " + Math.round(D.tests[1] * 0.05) + "개", "") +
+    tile("LISA 군집", D.lisa.replace(/[^0-9 ]/g, "").trim().split(/\s+/).reduce(function(a, b){ return a + (+b || 0); }, 0) + "교", D.lisa, "") +
+    tile("거점국립대 거리", D.hub.split(" ")[0], "평균 CCR 과 순위상관 " + D.hub.replace(/^\S+\s*/, ""), "") +
+    '</section>';
+
+  h += '<section class="panel lift"><div class="panel-hd"><h2>공간 의존성 지도</h2>' +
+    '<p class="hint">QGIS 3.40 · 교육지원청 경계 위 대학별 효율성 · 거점국립대 9개교 ★</p></div><div class="panel-bd">' +
+    '<div class="mapsw">' + D.maps.map(function(m, i){
+      return '<button class="abtn" type="button" aria-pressed="' + (i === 0) + '" onclick="mapShow(' + i + ')">' + esc(m[0]) + '</button>'; }).join("") + '</div>' +
+    '<p class="mapcap" id="mapCap">' + esc(D.maps[0][4]) + '</p>' +
+    '<figure class="mapfig"><img id="mapImg" src="' + D.maps[0][1] + '" alt="' + esc(D.maps[0][0]) + '" loading="lazy"></figure>' +
+    '<div class="dlrow"><a class="abtn primary" id="mapDl" href="' + D.maps[0][1] + '" download="' + D.maps[0][2] + '">' +
+    '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>지도 내려받기</a>' +
+    '<span class="fname" id="mapDlName">' + esc(D.maps[0][2]) + ' · ' + D.maps[0][3] + '</span></div>' +
+    '<p class="hint mapnote">※ 위치는 교육지원청 중심점(광역시는 시 전체)이고, 같은 구역의 대학은 해바라기 배치로 펼쳐 찍어 실제 캠퍼스 위치와 다릅니다.</p>' +
+    '</div></section>';
+
+  h += '<div class="dgrid">';
+  h += '<section class="panel"><div class="panel-hd"><h2>공간 자기상관 (Moran\'s I)</h2>' +
+    '<p class="hint">2015~2024 연도별 · 순열 999회 · 범위 ' + D.range[0] + ' ~ ' + D.range[1] + '</p></div><div class="panel-bd">' +
+    '<div class="tablewrap"><table class="dt"><thead><tr><th>이웃 기준</th><th>변수</th><th class="n">평균 I</th><th class="n">최소 ~ 최대</th><th class="n">유의 연도</th></tr></thead><tbody>';
+  D.moran.forEach(function(r){
+    h += '<tr><td class="k">' + esc(r[0]) + '</td><td class="dim">' + esc(r[1]) + '</td><td class="n">' + r[2].toFixed(3) + '</td>' +
+      '<td class="n">' + r[3].toFixed(3) + ' ~ ' + r[4].toFixed(3) + '</td><td class="n">' + r[5] + '/' + r[6] + '</td></tr>';
+  });
+  h += '</tbody></table></div></div></section>';
+
+  h += '<section class="panel"><div class="panel-hd"><h2>거점국립대까지의 거리</h2>' +
+    '<p class="hint">가장 가까운 거점국립대 · 거점 제외 ' + D.bins.reduce(function(a, b){ return a + b[1]; }, 0) + '교</p></div><div class="panel-bd">' +
+    '<div class="tablewrap"><table class="dt"><thead><tr><th>거리</th><th class="n">대학</th><th class="n">평균 CCR</th><th class="n">평균 BCC</th></tr></thead><tbody>';
+  D.bins.forEach(function(b){
+    h += '<tr><td class="k">' + esc(b[0]) + '</td><td class="n">' + b[1] + '</td><td class="n">' + b[2].toFixed(3) + '</td><td class="n">' + b[3].toFixed(3) + '</td></tr>';
+  });
+  h += '</tbody></table></div><p class="hint" style="margin-top:10px">순위상관: 전체 ' + esc(D.hub) + ' · 비수도권 ' + esc(D.hub2) + '</p></div></section>';
+  h += '</div>';
+
+  h += '<div class="dgrid">';
+  h += '<section class="panel"><div class="panel-hd"><h2>LISA 유의 대학</h2><p class="hint">' + esc(D.lisa) + '</p></div><div class="panel-bd">' +
+    '<div class="tablewrap"><table class="dt"><thead><tr><th>대학</th><th>지역</th><th>군집</th><th class="n">평균 CCR</th><th class="n">p</th></tr></thead><tbody>';
+  D.sig.forEach(function(r){
+    h += '<tr><td class="k">' + esc(r[0]) + '</td><td class="dim">' + esc(r[1]) + '</td><td><span class="pill' +
+      (r[2].charAt(0) === "고" ? " part" : "") + '">' + esc(r[2]) + '</span></td><td class="n">' + r[3].toFixed(3) + '</td><td class="n">' + r[4].toFixed(3) + '</td></tr>';
+  });
+  h += '</tbody></table></div></div></section>';
+
+  h += '<section class="panel"><div class="panel-hd"><h2>읽는 법과 쓸 곳</h2><p class="hint">' + esc(D.updated) + ' 예비 검정</p></div><div class="panel-bd"><ul class="fbl">' +
+    '<li><b>결론</b> — 가까운 대학끼리 효율성이 닮지 않는다. 시도 평균을 빼도 같고, 거점국립대와의 거리도 효율성과 무관하다.</li>' +
+    '<li><b>논문에서</b> — 효율성 격차가 개별 대학에서 온다는 예비분석(71.8%)을 실제 거리로 재확인. 연구문제 3 재설정(확인 요청 아홉째)의 근거.</li>' +
+    '<li><b>방법론</b> — Simar–Wilson 2단계의 관측치 독립 가정을 지지한다. 공간회귀(SAR·SDM)는 본 분석보다 제4장 강건성 한 문단으로.</li>' +
+    '<li><b>한계</b> — 교육지원청 중심점 기준. 본문에 실으려면 실제 주소 좌표로 다시 계산(좌표 변환 API 키 필요).</li>' +
+    '</ul><div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">' +
+    D.files.map(function(f){ return '<div class="dlrow"><a class="abtn" href="' + f[1] + '" download="' + f[2] + '">' + esc(f[0]) + ' 내려받기</a><span class="fname">' + esc(f[2]) + ' · ' + f[3] + '</span></div>'; }).join("") +
+    '</div></div></section>';
+  h += '</div>';
+  return h;
+}
+/* ===================== 지도 끝 ===================== */
 
 /* ===================== 부팅 ===================== */
 load();
