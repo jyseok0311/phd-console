@@ -12,7 +12,7 @@
 <script>
 /* 화면 테마: 기본은 밝게. 운영체제 다크 모드를 자동으로 따르지 않고, 상단 바 버튼으로만 바꾼다 */
 (function(){ var t = "light"; try{ t = localStorage.getItem("phd-console-theme") || "light"; }catch(e){}
-  document.documentElement.setAttribute("data-theme", t === "dark" ? "dark" : "light"); })();
+  document.documentElement.setAttribute("data-theme", t === "dark" || t === "angel" ? t : "light"); })();
 </script>
 <style>
 :root{
@@ -54,6 +54,23 @@
   --shadow:0 1px 2px rgba(0,0,0,.5), 0 14px 34px -22px rgba(0,0,0,.95);
   --shadow-lift:0 1px 2px rgba(0,0,0,.55), 0 26px 56px -30px rgba(0,0,0,1);
 }
+
+/* 천상 테마 — near-black 허공 · bone white · 하나의 따뜻한 빛(금). 붉은색은 경고에만 (docs/_천상테마_패치.py) */
+:root[data-theme="angel"]{
+  color-scheme:dark;
+  --ground:#05060A; --surface:#0C0E16; --surface-2:#131624; --surface-3:#1C2032;
+  --line:#242942; --line-soft:#161A2A; --line-strong:#3D4468;
+  --ink:#F4F1EA; --ink-2:#B9B5C9; --ink-3:#9490AB;
+  --accent:#FFB24D; --accent-ink:#FFCB80; --accent-soft:#2B1E0C; --accent-line:#8A5A1E; --on-accent:#1A0F00;
+  --warn:#FF7A7A; --warn-soft:#2C1115; --warn-line:#7A2B33;
+  --grid:#161A2A;
+  --shadow:0 1px 2px rgba(0,0,0,.6), 0 14px 34px -22px rgba(0,0,0,1);
+  --shadow-lift:0 0 0 1px rgba(255,178,77,.07), 0 24px 56px -28px rgba(255,150,40,.32);
+}
+:root[data-theme="angel"] body{background:radial-gradient(880px 460px at 82% -10%, rgba(255,150,40,.13), transparent 62%) no-repeat, var(--ground)}   /* fixed 는 스크롤마다 다시 그려 무겁다 — 맨 위에서만 번지게 */
+:root[data-theme="angel"] .navb[aria-current="page"]{box-shadow:inset 0 0 0 1px var(--accent-line), 0 0 22px -8px rgba(255,178,77,.55)}
+:root[data-theme="angel"] .corr td[data-q="4"], :root[data-theme="angel"] .corr td[data-q="5"]{color:#1A0F00}
+:root[data-theme="angel"] .mapfig img{border-color:var(--accent-line); box-shadow:0 0 30px -12px rgba(255,178,77,.5)}
 
 *{box-sizing:border-box}
 html,body{margin:0; padding:0}
@@ -370,6 +387,7 @@ tr.done td{color:var(--ink-3)}
 :root{ --seq1:#DCEBE8; --seq2:#A9D2CA; --seq3:#6FB5A9; --seq4:#358E81; --seq5:#0F5F58; --nodata:#E7ECE9 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --seq1:#153A35; --seq2:#1E5A52; --seq3:#2F8074; --seq4:#4FA99A; --seq5:#8ED3C7; --nodata:#1C2523 } }
 :root[data-theme="dark"]{ --seq1:#153A35; --seq2:#1E5A52; --seq3:#2F8074; --seq4:#4FA99A; --seq5:#8ED3C7; --nodata:#1C2523 }
+:root[data-theme="angel"]{ --seq1:#2A1D0C; --seq2:#5A3C14; --seq3:#8A5A1C; --seq4:#DD9A38; --seq5:#FFC46B; --nodata:#131624; }   /* 금 한 가지 색의 명암 — 위 규칙(운영체제 다크 모드)보다 뒤에 있어야 이긴다 */
 .dgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px}
 .dgrid > .panel{min-width:0}
 table.dt{min-width:0; font-size:12px}
@@ -1802,9 +1820,15 @@ function fallbackCopy(text){
 
 
 /* ===================== 화면 테마 ===================== */
-function themeLabel(){ var b = document.getElementById("themeTxt"); if(b) b.textContent = document.documentElement.getAttribute("data-theme") === "dark" ? "밝게" : "어둡게"; }
+var THEMES = ["light", "dark", "angel"], THEME_NEXT = {light:"어둡게", dark:"천상", angel:"밝게"}, THEME_NOW = {light:"밝음", dark:"어둠", angel:"천상"};
+function themeCur(){ var t = document.documentElement.getAttribute("data-theme"); return THEMES.indexOf(t) < 0 ? "light" : t; }
+function themeLabel(){
+  var cur = themeCur(), b = document.getElementById("themeTxt"), btn = document.querySelector("[data-theme-toggle]");
+  if(b) b.textContent = THEME_NEXT[cur];
+  if(btn) btn.setAttribute("aria-label", "화면 테마 바꾸기 — 지금 " + THEME_NOW[cur] + ", 다음 " + THEME_NEXT[cur]);
+}
 document.querySelector("[data-theme-toggle]").addEventListener("click", function(){
-  var next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  var next = THEMES[(THEMES.indexOf(themeCur()) + 1) % THEMES.length];
   document.documentElement.setAttribute("data-theme", next);
   try{ localStorage.setItem("phd-console-theme", next); }catch(e){}
   themeLabel();
