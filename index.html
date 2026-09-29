@@ -109,6 +109,10 @@ a{color:var(--accent)}
 .rail.editing .navb .mv{display:inline-flex}
 .rail.editing .navb[aria-current="page"]::before{display:none}
 .navb.dragging{opacity:.45}
+.skiplink{position:absolute; left:8px; top:-48px; z-index:50; background:var(--accent); color:var(--on-accent); padding:9px 14px;
+  border-radius:var(--r-s); font-size:13px; font-weight:600; text-decoration:none}
+.skiplink:focus{top:8px}
+main:focus{outline:none}
 .srlive{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
 .savechip{display:inline-flex; align-items:center; gap:6px; font-size:10.5px; color:var(--ink-3);
   font-family:var(--f-mono); padding:0 8px}
@@ -497,6 +501,7 @@ table.dt td.dim{color:var(--ink-3); font-size:11.5px}
 .ref .rab{font-size:11.5px; color:var(--ink-3); margin-top:5px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
 .ref.open .rab{display:block}
 .ref .memo{margin-top:6px} .ref .memo textarea{min-height:34px; font-size:12px}
+.ref{content-visibility:auto; contain-intrinsic-size:auto 150px}   /* 화면 밖 항목은 그리기를 미룬다 */
 @media (max-width:640px){ .ref{grid-template-columns:1fr} }
 .addform{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px}
 .addform .field.wide{grid-column:1 / -1}
@@ -507,6 +512,7 @@ table.dt td.dim{color:var(--ink-3); font-size:11.5px}
 </style>
 </head>
 <body>
+<a class="skiplink" href="#/" id="skipLink">본문으로 건너뛰기</a>
 
 <div class="app">
   <nav class="rail" aria-label="주요 화면">
@@ -546,7 +552,7 @@ table.dt td.dim{color:var(--ink-3); font-size:11.5px}
       <h1 id="scTitle">오늘</h1>
       <div class="right"><button class="themebtn" data-theme-toggle aria-label="화면 밝게/어둡게 전환"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="themeTxt">어둡게</span></button><button class="themebtn navorderbtn" id="navOrderBtn" type="button" aria-haspopup="dialog" aria-label="메뉴 순서 바꾸기"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="m3 9 2-3 2 3M3 15l2 3 2-3"/></svg><span>메뉴</span></button><div class="meta" id="scMeta"></div></div>
     </header>
-    <main id="screen"></main>
+    <main id="screen" tabindex="-1"></main>
   </div>
 </div>
 
@@ -728,6 +734,7 @@ function go(name, push){
   screen = name;
   if(push !== false && location.hash !== "#/" + name) location.hash = "#/" + name;
   document.getElementById("scTitle").textContent = SCREENS[name].title;
+  document.title = SCREENS[name].title + " · 박사학위 콘솔";
   Array.prototype.forEach.call(document.querySelectorAll(".navb"), function(b){
     if(b.dataset.go === name) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
   });
@@ -961,7 +968,7 @@ function scRef(){
     var M = MONTHS[i];
     h += '<tr class="' + (state.m[M.k]?"done":"") + '"><td class="mono">' + M.label + '</td><td>' + esc(M.stage) +
       '</td><td>' + esc(M.out) + '</td><td>' + esc(M.adv) + '</td>' +
-      '<td class="st"><input class="ck mchk" type="checkbox" data-mk="' + M.k + '"' + (state.m[M.k]?" checked":"") + '></td></tr>';
+      '<td class="st"><input class="ck mchk" type="checkbox" data-mk="' + M.k + '" aria-label="' + esc(M.label || M.k) + ' 완료"' + (state.m[M.k]?" checked":"") + '></td></tr>';
   }
   h += '</tbody></table></div></div></section>';
 
@@ -1107,14 +1114,14 @@ function scData(){
 
   /* 시도 지도 */
   h += '<section class="panel"><div class="panel-hd"><h2>시도별 현황</h2>' +
-    '<div class="dsel"><select data-dsel="ind">' + Object.keys(TD.sidoUnits).map(function(k){ return '<option' + (k===DSEL.ind?" selected":"") + '>' + k + '</option>'; }).join("") + '</select>' +
-    '<select data-dsel="year">' + Y.map(function(y){ return '<option' + (String(y)===DSEL.year?" selected":"") + '>' + y + '</option>'; }).join("") + '</select></div></div>' +
+    '<div class="dsel"><select data-dsel="ind" aria-label="지표">' + Object.keys(TD.sidoUnits).map(function(k){ return '<option' + (k===DSEL.ind?" selected":"") + '>' + k + '</option>'; }).join("") + '</select>' +
+    '<select data-dsel="year" aria-label="연도">' + Y.map(function(y){ return '<option' + (String(y)===DSEL.year?" selected":"") + '>' + y + '</option>'; }).join("") + '</select></div></div>' +
     '<div class="panel-bd"><div class="maplay"><div class="kmap">' + sidoMap() + '</div><div class="rank">' + sidoRank() + '</div></div>' +
     '<p class="dnote" style="margin-top:10px">대학 소재 시도 기준 합계·평균. 인구·GRDP·고3은 통계청 시도 통계, 입학자원 압력 = 시도 18세 인구 ÷ 시도 내 4년제 입학정원.</p></div></section>';
 
   /* 학교별 탐색 */
   h += '<section class="panel"><div class="panel-hd"><h2>학교별 탐색</h2>' +
-    '<div class="dsel"><input list="schoolList" id="schoolIn" placeholder="학교명 입력 · 선택" value="' + esc(DSEL.school||"") + '">' +
+    '<div class="dsel"><input list="schoolList" id="schoolIn" aria-label="학교명 검색" placeholder="학교명 입력 · 선택" value="' + esc(DSEL.school||"") + '">' +
     '<datalist id="schoolList">' + TD.schools.map(function(x){ return '<option value="' + esc(x.name) + '">'; }).join("") + '</datalist></div></div>' +
     '<div class="panel-bd">' + schoolTable() + '</div></section>';
   return h;
@@ -1276,13 +1283,13 @@ function scToc(){
     '<div class="panel-bd"><div class="toc">';
   TOC.forEach(function(x){
     var st = tocSt(x.id), isLeaf = !(x.l === 1) && !TOC.some(function(y){ return y.l === 3 && y.id.indexOf(x.id + ".") === 0; });
-    var sel = isLeaf ? '<select data-toc-st="' + x.id + '" class="st-' + st + '">' + TOC_ST.map(function(n, i){ return '<option value="' + i + '"' + (i === st ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' :
+    var sel = isLeaf ? '<select data-toc-st="' + x.id + '" aria-label="진행 상태 — ' + x.id + ' ' + esc(x.t) + '" class="st-' + st + '">' + TOC_ST.map(function(n, i){ return '<option value="' + i + '"' + (i === st ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' :
       '<span class="cnts">' + (x.l === 1 ? chapterProg(x.id) : "") + '</span>';
-    var pg = x.l === 2 ? '<input type="number" min="0" max="200" step="1" data-toc-pg="' + x.id + '" value="' + (state.toc.pg[x.id] || "") + '" placeholder="쪽">' : '<span></span>';
+    var pg = x.l === 2 ? '<input type="number" min="0" max="200" step="1" data-toc-pg="' + x.id + '" aria-label="현재 쪽수 — ' + x.id + ' ' + esc(x.t) + '" value="' + (state.toc.pg[x.id] || "") + '" placeholder="쪽">' : '<span></span>';
     var tp = x.l === 2 && x.tp ? '<span class="pg">/ ' + x.tp + '</span>' : '<span></span>';
     var wk = x.w ? '<small>W' + pad(x.w) + ' · ' + range(x.w) + (x.doc ? ' · <a href="' + DOCS_URL + '" target="_blank" rel="noopener">' + esc(x.doc.replace('박사학위논문_', '').replace('_석재영', '')) + '</a>' : '') + '</small>' : '';
     h += '<div class="tocrow l' + x.l + '"><span class="tn">' + x.id + '</span><span class="tt">' + esc(x.t) + wk + '</span>' + sel + pg + tp + '</div>';
-    if(isLeaf) h += '<div class="tocrow" style="padding:0 10px 4px"><span></span><div class="tocnote" style="grid-column:2/-1"><input type="text" data-toc-note="' + x.id + '" maxlength="300" value="' + esc(state.toc.note[x.id] || "") + '" placeholder="메모 · 남은 일"></div></div>';
+    if(isLeaf) h += '<div class="tocrow" style="padding:0 10px 4px"><span></span><div class="tocnote" style="grid-column:2/-1"><input type="text" data-toc-note="' + x.id + '" aria-label="메모 — ' + x.id + ' ' + esc(x.t) + '" maxlength="300" value="' + esc(state.toc.note[x.id] || "") + '" placeholder="메모 · 남은 일"></div></div>';
   });
   h += '</div></div></section>';
   h += '<section class="panel"><div class="panel-hd"><h2>장별 계획</h2><p class="hint">36주 보드의 주차와 연결</p></div><div class="panel-bd"><div class="tablewrap"><table><thead><tr><th>장</th><th>계획 주차</th><th>산출물</th><th>연결 문서</th></tr></thead><tbody>' +
@@ -1382,12 +1389,12 @@ function scRefs(){
     '<div class="actions"><button class="abtn" data-act="refs-csv">CSV</button><button class="abtn" data-act="refs-bib">BibTeX</button><button class="abtn" data-act="refs-txt">참고문헌 목록</button>' +
     '<button class="abtn" data-act="refs-import">RIS·BibTeX·CSV 가져오기</button><input type="file" id="refFile" accept=".ris,.bib,.txt,.csv" hidden><span class="msg" id="actMsg" role="status"></span></div></div>' +
     '<div class="panel-bd" style="display:flex;flex-direction:column;gap:12px">' +
-    '<div class="reftools"><input type="search" id="refQ" placeholder="제목·저자·학술지·메모 검색" value="' + esc(RSEL.q) + '">' +
-    (TH && TH.areas && TH.areas.length ? '<select data-rsel="area"><option value="">전체 영역</option>' + TH.areas.map(function(a){ return '<option value="' + esc(a.id) + '"' + (a.id === RSEL.area ? " selected" : "") + '>' + esc(a.id) + ' ' + esc(a.t) + '</option>'; }).join("") + '</select>' : '') +
-    (TH && TH.groups ? '<select data-rsel="grp"><option value="">전체 묶음</option>' + grpList().filter(function(g){ return !RSEL.area || g.area === RSEL.area; }).map(function(g){ return '<option value="' + esc(g.k) + '"' + (g.k === RSEL.grp ? " selected" : "") + '>' + esc(g.k) + ' ' + esc(g.t) + '</option>'; }).join("") + '</select>' : '') +
-    '<select data-rsel="tag"><option value="">전체 주제</option>' + refTags().map(function(t){ return '<option value="' + esc(t.t) + '"' + (t.t === RSEL.tag ? " selected" : "") + '>' + esc(t.t) + ' (' + t.n + ')</option>'; }).join("") + '</select>' +
-    '<select data-rsel="st"><option value="">전체 상태</option>' + REF_ST.map(function(n, i){ return '<option value="' + i + '"' + (String(i) === RSEL.st ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' +
-    '<select data-rsel="sort">' + [["cited", "인용수순"], ["year", "최신순"], ["title", "제목순"], ["added", "추가순"]].map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === RSEL.sort ? " selected" : "") + '>' + o[1] + '</option>'; }).join("") + '</select>' +
+    '<div class="reftools"><input type="search" id="refQ" aria-label="문헌 검색" placeholder="제목·저자·학술지·메모 검색" value="' + esc(RSEL.q) + '">' +
+    (TH && TH.areas && TH.areas.length ? '<select data-rsel="area" aria-label="영역 필터"><option value="">전체 영역</option>' + TH.areas.map(function(a){ return '<option value="' + esc(a.id) + '"' + (a.id === RSEL.area ? " selected" : "") + '>' + esc(a.id) + ' ' + esc(a.t) + '</option>'; }).join("") + '</select>' : '') +
+    (TH && TH.groups ? '<select data-rsel="grp" aria-label="묶음 필터"><option value="">전체 묶음</option>' + grpList().filter(function(g){ return !RSEL.area || g.area === RSEL.area; }).map(function(g){ return '<option value="' + esc(g.k) + '"' + (g.k === RSEL.grp ? " selected" : "") + '>' + esc(g.k) + ' ' + esc(g.t) + '</option>'; }).join("") + '</select>' : '') +
+    '<select data-rsel="tag" aria-label="주제 필터"><option value="">전체 주제</option>' + refTags().map(function(t){ return '<option value="' + esc(t.t) + '"' + (t.t === RSEL.tag ? " selected" : "") + '>' + esc(t.t) + ' (' + t.n + ')</option>'; }).join("") + '</select>' +
+    '<select data-rsel="st" aria-label="읽기 상태 필터"><option value="">전체 상태</option>' + REF_ST.map(function(n, i){ return '<option value="' + i + '"' + (String(i) === RSEL.st ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' +
+    '<select data-rsel="sort" aria-label="정렬 필터">' + [["cited", "인용수순"], ["year", "최신순"], ["title", "제목순"], ["added", "추가순"]].map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === RSEL.sort ? " selected" : "") + '>' + o[1] + '</option>'; }).join("") + '</select>' +
     (TH && TH.groups ? '<label class="rchk"><input type="checkbox" data-rchk="byGrp"' + (RSEL.byGrp ? " checked" : "") + '> 묶음별 보기</label>' +
       '<label class="rchk"><input type="checkbox" data-rchk="core"' + (RSEL.core ? " checked" : "") + '> ★ 핵심만</label>' +
       '<label class="rchk"><input type="checkbox" data-rchk="nodup"' + (RSEL.nodup ? " checked" : "") + '> 중복 숨김</label>' : '') +
@@ -1462,11 +1469,11 @@ function refRow(r){
     '<div class="rtags">' + (r.tags || []).map(function(t){ return '<span class="tag" data-tagf="' + esc(t) + '">' + esc(t) + '</span>'; }).join("") + '</div>' +
     (th.note ? '<div class="rwhy">쓸 곳 — ' + esc(th.note) + '</div>' : '') +
     (r.abstract ? '<div class="rab" data-ab>' + esc(r.abstract) + '</div>' : '') +
-    '<div class="memo"><textarea data-rmemo="' + r.id + '" maxlength="1500" placeholder="핵심 발견 · 변수 · 방법 · 한계">' + esc(state.refs.memo[r.id] || "") + '</textarea></div></div>' +
-    '<div class="rside"><select data-rst="' + r.id + '">' + REF_ST.map(function(n, i){ return '<option value="' + i + '"' + (i === st ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' +
-    '<select data-rcite="' + r.id + '"><option value="">인용 장절</option>' + secs.map(function(x){ return '<option value="' + x.id + '"' + (state.refs.cite[r.id] === x.id ? " selected" : "") + '>' + x.id + ' ' + esc(x.t.slice(0, 18)) + '</option>'; }).join("") + '</select>' +
+    '<div class="memo"><textarea data-rmemo="' + r.id + '" aria-label="메모 — ' + esc(r.title || "") + '" maxlength="1500" placeholder="핵심 발견 · 변수 · 방법 · 한계">' + esc(state.refs.memo[r.id] || "") + '</textarea></div></div>' +
+    '<div class="rside"><select data-rst="' + r.id + '" aria-label="읽기 상태 — ' + esc(r.title || "") + '">' + REF_ST.map(function(n, i){ return '<option value="' + i + '"' + (i === st ? " selected" : "") + '>' + n + '</option>'; }).join("") + '</select>' +
+    '<select data-rcite="' + r.id + '" aria-label="인용 장절 — ' + esc(r.title || "") + '"><option value="">인용 장절</option>' + secs.map(function(x){ return '<option value="' + x.id + '"' + (state.refs.cite[r.id] === x.id ? " selected" : "") + '>' + x.id + ' ' + esc(x.t.slice(0, 18)) + '</option>'; }).join("") + '</select>' +
     (th.access ? '<span class="racc">' + esc(th.access) + '</span>' : '') +
-    '<button class="del" data-rdel="' + r.id + '">목록에서 숨기기</button></div></div>';
+    '<button class="del" data-rdel="' + r.id + '" aria-label="목록에서 숨기기 — ' + esc(r.title || "") + '">목록에서 숨기기</button></div></div>';
 }
 function refList(){
   if(RSEL.byGrp) return refListGrouped();
@@ -1929,11 +1936,14 @@ function scReport(){
 /* ===================== 피드백 반영 ===================== */
 /* 지도교수 피드백과 반영 여부. 원본은 박사학위논문/지도교수 면담/피드백_반영표.xlsx — 그 표를 고치면 이 상수도 맞춘다. */
 var FEEDBACK = {
-  updated: "2026. 9. 23.",
+  updated: "2026. 9. 29.",
   file: "docs/feedback-tracker.xlsx",
   name: "피드백_반영표.xlsx",
   /* [피드백, 제기일, 반영한 것[], 아직 안 한 것[], 상태] */
   sum: [
+    ["교수님 메일 — 원고 송부·면담 일정", "9. 28.",
+      ["분석 자료 v1.5 · 진행보고 v2.0 · 집필 현황 v1.0 세 가지 준비", "메일 최종본 작성, 면담 후보 일시 자리와 집필 일정(안)까지 마련"],
+      ["메일 발송(기한 9. 29.) — 직접 보내야 함", "면담 후보 일시 정하기, 교수님 회신 뒤 확정"], "진행 중"],
     ["투입·산출변수 최대 확보", "9. 17.",
       ["투입 8 × 산출 10, 환경 55개로 확대", "모두 넣으면 효율=1 대학이 73.5% — 판별력이 사라짐을 검증 (7~10절)"],
       ["주 분석을 기본 3 × 4로 둘지 결정"], "결정 대기"],
@@ -1952,18 +1962,20 @@ var FEEDBACK = {
   ],
   /* [번호, 제기일, 피드백 요지, 대응 방향, 반영 위치, 커밋, 상태, 비고] — 피드백_반영표.xlsx 와 같은 순서 */
   items: [
-    [1, "09-17", "투입·산출변수 최대 확보", "투입 8 × 산출 10, 환경 55개로 확대, 판별력 검증", "진행보고 7~10절 · 변수구성_최대안 v1.0", "8f92396", "검토 요청", "주 분석 3 × 4 제안 — 확인 요청 둘째"],
-    [2, "09-22", "윈도우 분석 검토", "3년 창 8개·5년 창 6개 CCR·BCC, EMS 입력 파일", "진행보고 11절 · EMS입력_윈도우분석.xlsx", "fbbefc9", "진행 중", "EMS 대조, 창 너비 확정(여덟째)"],
-    [3, "09-23", "① 비용변수 — 회계별 분해", "총교육비 → 본회계·산학협력단·도서구입비·기계기구매입비 + 발전기금", "진행보고 13절 · build_cost_vars.py", "3490086", "완료", "국공립 97% · 사립 98% 채움"],
-    [4, "09-23", "① 비용변수 — 이중 계상", "산학협력단 지출 ≈ 교외연구비, M0~M3 비교", "진행보고 13절 · 이중계상_처리방식_비교.xlsx", "53981eb", "검토 요청", "본회계 투입 채택 — 확인 요청 열째"],
-    [5, "09-23", "① 비용변수 — 세출 비목", "국공립 세출 비목 재파싱(라벨 오염, 분류 3회 변경)", "—", "", "미착수", "현재는 회계 단위 분해까지"],
-    [6, "09-23", "① 비용변수 — 확정 모형 반영", "6절 확정안·7절 투입변수 표 교체", "—", "", "보류", "열째 결정 후 연구계획서 변수표와 함께"],
-    [7, "09-23", "② SFA 와 DEA 비교", "SFA 16개 사양, DEA 와 순위상관, BC95 결정요인", "진행보고 14~15절 · 분석모형_전수검토 v1.0", "d53650d", "완료", "41개 경우 종합"],
-    [8, "09-23", "② SFA — 주 모형 여부", "교차 검증 / 주 모형 결정 요청", "진행보고 18절", "", "검토 요청", "확인 요청 열한째"],
-    [9, "09-23", "② SFA — 패널 · 투입가격", "Greene(2005) TRE/TFE, 투입가격 비용함수", "—", "", "미착수", "SFA 가 주 모형이 되면 착수"],
-    [10, "09-23", "③ 관련 이론 정리", "근거 이론 11개, 비용 이론·SFA 문헌 20편", "진행보고 3~4절 · 근거이론_구성 v1.1", "92edc16", "완료", ""],
-    [11, "09-23", "③ 이론 — 원문 확보", "T8~T11 대표 문헌 13편", "—", "", "미착수", "0 / 13 — 구독 DB 는 직접 내려받기"],
-    [12, "09-23", "③ 이론 — 문헌 집계 갱신", "16·17절 집계와 부록에 20편 추가 (237 → 257편), 19절 교차참조 수정", "진행보고 16·17절 · 부록 1·2", "", "완료", "16절 표 A·D 수치·묶음 수 오류도 바로잡음"]
+    [1, "09-17", "투입·산출변수를 최대한 많이 확보", "투입 8 × 산출 10, 환경 55개로 확대하고 판별력 검증(효율=1 비율 73.5%)", "진행보고 v2.0 7~10절 · 변수구성_최대안 v1.0", "8f92396", "검토 요청", "주 분석은 3 × 4, 최대안은 민감도로 제안 — 확인 요청 둘째"],
+    [2, "09-22", "윈도우 분석 검토 (EMS에서 가능)", "3년 창 8개·5년 창 6개를 CCR·BCC 로 계산(상관 0.978), EMS 입력 파일 준비", "진행보고 v2.0 11절 · EMS입력_윈도우분석.xlsx", "fbbefc9", "진행 중", "남은 일: EMS 로 직접 돌려 결과 대조, 창 너비 확정(확인 요청 여덟째)"],
+    [3, "09-23", "① 교육재정 비용변수 대폭 보강 — 회계별 분해", "총교육비를 본회계·산학협력단·도서구입비·기계기구매입비 네 갈래 + 발전기금으로 분해(1,827행 합계 일치)", "진행보고 v2.0 13절 · build_cost_vars.py", "3490086", "완료", "국공립 97%·사립 98% 채움"],
+    [4, "09-23", "① 비용변수 — 이중 계상 처리", "산학협력단 지출 ≈ 교외연구비(상관 0.969) 확인, 처리 방식 M0~M3 비교", "진행보고 v2.0 13절 · 이중계상_처리방식_비교.xlsx", "53981eb", "검토 요청", "본회계 투입(M1) 채택 여부 — 확인 요청 열째"],
+    [5, "09-23", "① 비용변수 — 세출 비목(인건비·운영비 등) 보강", "국공립 세출 비목 재파싱 필요(라벨 오염, 2015·2018·2021 분류 변경). 사립 재정알리미 비목은 국공립 미공시", "—", "", "미착수", "「대폭 보강」의 비목 단위 보강은 아직 — 현재는 회계 단위 분해까지"],
+    [6, "09-23", "① 비용변수 — 확정 모형에 반영", "6절 분석모형 확정안·7절 투입변수 표는 아직 총교육비", "—", "", "보류", "확인 요청 열째 결정 후 6·7절과 연구계획서 변수표를 함께 수정"],
+    [7, "09-23", "② SFA 와 DEA 비교", "SFA 비용함수 추정기 작성·모의자료 검증, 16개 사양 추정, DEA 와 순위상관 0.53(비용 1개로 맞추면 0.68~0.72), BC95 결정요인", "진행보고 v2.0 14~15절 · 분석모형_전수검토 v1.0 · sfa.py", "d53650d", "완료", "41개 경우 종합"],
+    [8, "09-23", "② SFA — 주 모형 여부", "교차 검증으로 둘지 주 모형으로 올릴지 결정 요청", "진행보고 v2.0 18절", "", "검토 요청", "확인 요청 열한째"],
+    [9, "09-23", "② SFA — 패널 SFA · 투입가격", "Greene(2005) TRE/TFE 패널 SFA 미추정, 투입가격 포함 비용함수 미추정", "—", "", "미착수", "SFA 가 주 모형이 되면 착수. 투입가격은 Izadi 외(2002) 근거로 생략 중"],
+    [10, "09-23", "③ 관련 이론 정리", "근거 이론 7개 → 11개(T8 확률변경·비용쌍대성, T9 X-비효율, T10 규모·범위의 경제, T11 수입비용이론·비용질병), 비용 이론·SFA 문헌 20편 추가", "진행보고 v2.0 3~4절 · 근거이론_구성 v1.1", "92edc16", "완료", ""],
+    [11, "09-23", "③ 이론 — 대표 문헌 원문 확보", "T8~T11 대표 문헌 원문 13편 미확보(0/13)", "—", "", "미착수", "구독 DB 는 직접 내려받기 필요"],
+    [12, "09-23", "③ 이론 — 진행보고 문헌 집계 갱신", "16·17절 집계와 부록에 20편 추가(237 → 257편), 19절 교차참조 제14절 → 제18절", "진행보고 v2.0 16·17절 · 부록 1·2", "", "완료", "16절 표 A·D 영역 수치와 묶음 수(18 → 19개) 오류도 함께 바로잡음"],
+    [13, "09-28", "논문 쓴 거 내일(9. 29.)까지 보내주기 — 교수님 메일", "분석 자료·진행보고·집필 현황 3종 준비, 메일 최종본 작성", "분석 자료 v1.5 · 진행보고 v2.0 · 집필 현황 v1.0", "", "진행 중", "발송은 직접 — 기한 9. 29."],
+    [14, "09-28", "일정 잡기 — 면담 일시", "메일에 후보 일시 자리를 마련, 집필 일정(안) 작성", "집필 현황 v1.0 · 메일 최종본", "", "미착수", "후보 일시 세 개 미정, 교수님 회신 뒤 확정"]
   ],
   /* 교수님 결정이 필요한 것 [사안, 제안, 확인 요청 번호] */
   ask: [
@@ -1973,6 +1985,7 @@ var FEEDBACK = {
   ],
   /* 결정과 무관하게 할 수 있는 것 [할 일, 관련 피드백] */
   todo: [
+    ["메일 발송(기한 9. 29.) · 면담 후보 일시 세 개 정하기 (직접)", "교수님 메일 9. 28."],
     ["국공립 세출 비목 재파싱", "피드백 ①"],
     ["T8~T11 대표 문헌 원문 13편 확보", "피드백 ③"],
     ["EMS 윈도우 분석 결과 대조 (직접 실행)", "윈도우 분석"]
@@ -2000,7 +2013,7 @@ function scFeedback(){
 
   /* 피드백별 반영 현황 */
   h += '<section class="panel lift"><div class="panel-hd"><h2>피드백별 반영 현황</h2>' +
-    '<p class="hint">③ 이론 정리만 끝까지 반영 · 나머지는 일부 반영이거나 결정 대기</p></div>' +
+    '<p class="hint">최신순 · 9. 23. 피드백 중에는 ③ 이론 정리만 끝까지 반영, 나머지는 일부 반영이거나 결정 대기</p></div>' +
     '<div class="panel-bd"><div class="tablewrap"><table class="dt fbt"><thead>' +
     '<tr><th>피드백</th><th>반영한 것</th><th>아직 안 한 것</th><th>상태</th></tr></thead><tbody>';
   F.sum.forEach(function(x){
@@ -2262,6 +2275,8 @@ function dragEnd(){
 }
 NAVLIST.addEventListener("pointerup", dragEnd);
 NAVLIST.addEventListener("pointercancel", dragEnd);
+
+document.getElementById("skipLink").addEventListener("click", function(e){ e.preventDefault(); document.getElementById("screen").focus(); });
 
 /* ===================== 부팅 ===================== */
 load();
