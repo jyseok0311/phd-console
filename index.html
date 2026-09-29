@@ -93,6 +93,23 @@ a{color:var(--accent)}
   color:var(--ink-3); letter-spacing:.04em}
 .railprog .pb{height:3px; border-radius:99px; background:var(--surface-3); overflow:hidden}
 .railprog .pb i{display:block; height:100%; background:var(--accent); border-radius:99px; transition:width .4s ease}
+/* 메뉴 순서 편집 */
+.navedit{display:flex; flex-wrap:wrap; gap:6px; padding:0 4px}
+.navedit button{display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--ink-3); padding:5px 8px;
+  border:1px solid var(--line); border-radius:var(--r-s); background:var(--surface)}
+.navedit button:hover{color:var(--ink); background:var(--surface-2)}
+.navedit button[aria-pressed="true"]{color:var(--accent-ink); background:var(--accent-soft); border-color:var(--accent-line); font-weight:600}
+.navedit svg{width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
+.navhint{font-size:10.5px; color:var(--ink-3); padding:0 8px; line-height:1.4}
+.navb .mv{display:none; margin-left:auto; gap:2px}
+.navb .mv span{display:grid; place-items:center; width:20px; height:20px; border-radius:4px; font-size:9px; color:var(--ink-3)}
+.navb .mv span:hover{background:var(--surface-3); color:var(--ink)}
+.rail.editing .navb{cursor:grab; box-shadow:inset 0 0 0 1px var(--line-strong); margin-bottom:2px}
+.rail.editing .navb .cnt{display:none}
+.rail.editing .navb .mv{display:inline-flex}
+.rail.editing .navb[aria-current="page"]::before{display:none}
+.navb.dragging{opacity:.45}
+.srlive{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
 .savechip{display:inline-flex; align-items:center; gap:6px; font-size:10.5px; color:var(--ink-3);
   font-family:var(--f-mono); padding:0 8px}
 .savechip i{width:5px;height:5px;border-radius:50%;background:var(--accent-line); flex:none}
@@ -488,8 +505,14 @@ table.dt td.dim{color:var(--ink-3); font-size:11.5px}
         <span class="pl"><span id="rpL">36주 진행</span><span id="rpR"></span></span>
         <span class="pb"><i id="rpBar" style="width:0%"></i></span>
       </div>
+      <div class="navedit">
+        <button type="button" id="navEdit" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="m3 9 2-3 2 3M3 15l2 3 2-3"/></svg><span>메뉴 순서 바꾸기</span></button>
+        <button type="button" id="navReset" hidden>기본 순서로</button>
+      </div>
+      <p class="navhint" id="navHint" hidden>끌어서 옮기거나 ▲▼ · 방향키(↑↓)</p>
       <span class="savechip"><i></i><span id="saveTxt">이 브라우저에 저장</span></span>
     </div>
+    <span class="srlive" id="navLive" aria-live="polite"></span>
   </nav>
 
   <div class="col">
@@ -2072,10 +2095,92 @@ function scMap(){
 }
 /* ===================== 지도 끝 ===================== */
 
+/* ===================== 메뉴 순서 ===================== */
+/* 사이드바 메뉴 순서를 사용자가 바꾼다. 순서는 이 브라우저에만 저장(localStorage) — 저장이 막혀 있으면 기본 순서. */
+var NAVKEY = "phd-console-navorder";
+var RAIL = document.querySelector(".rail");
+function navItems(){ return Array.prototype.slice.call(RAIL.querySelectorAll(".navb")); }
+var NAV_DEFAULT = navItems().map(function(b){ return b.dataset.go; });
+function navLabel(b){ return b.querySelector("span").textContent; }
+function applyNavOrder(order){
+  var foot = RAIL.querySelector(".railfoot"), by = {};
+  navItems().forEach(function(b){ by[b.dataset.go] = b; });
+  order.forEach(function(k){ if(by[k]){ RAIL.insertBefore(by[k], foot); delete by[k]; } });
+  NAV_DEFAULT.forEach(function(k){ if(by[k]) RAIL.insertBefore(by[k], foot); });   // 저장 뒤 새로 생긴 메뉴는 끝에
+}
+function saveNavOrder(){
+  var cur = navItems().map(function(b){ return b.dataset.go; });
+  try{
+    if(cur.join() === NAV_DEFAULT.join()) localStorage.removeItem(NAVKEY);
+    else localStorage.setItem(NAVKEY, JSON.stringify(cur));
+  }catch(e){}
+}
+(function(){ try{ var r = localStorage.getItem(NAVKEY); if(r) applyNavOrder(JSON.parse(r)); }catch(e){} })();
+
+function navEditing(){ return RAIL.classList.contains("editing"); }
+function navAnnounce(b){
+  var i = navItems().indexOf(b) + 1;
+  document.getElementById("navLive").textContent = navLabel(b) + ", " + i + "번째";
+}
+function navMove(b, d){
+  var items = navItems(), i = items.indexOf(b), j = i + d;
+  if(j < 0 || j >= items.length) return;
+  if(d < 0) RAIL.insertBefore(b, items[j]); else RAIL.insertBefore(b, items[j].nextSibling);
+  saveNavOrder(); navAnnounce(b);
+}
+function setNavEdit(on){
+  RAIL.classList.toggle("editing", on);
+  var eb = document.getElementById("navEdit");
+  eb.setAttribute("aria-pressed", on ? "true" : "false");
+  eb.querySelector("span").textContent = on ? "완료" : "메뉴 순서 바꾸기";
+  document.getElementById("navReset").hidden = !on;
+  document.getElementById("navHint").hidden = !on;
+  navItems().forEach(function(b){
+    b.draggable = on;
+    if(on && !b.querySelector(".mv")){
+      var m = document.createElement("span"); m.className = "mv"; m.setAttribute("aria-hidden", "true");
+      m.innerHTML = '<span data-mv="-1" title="위로">▲</span><span data-mv="1" title="아래로">▼</span>';
+      b.appendChild(m);
+    }
+  });
+  if(!on) saveNavOrder();
+}
+document.getElementById("navEdit").addEventListener("click", function(){ setNavEdit(!navEditing()); });
+document.getElementById("navReset").addEventListener("click", function(){
+  applyNavOrder(NAV_DEFAULT); saveNavOrder(); document.getElementById("navLive").textContent = "기본 순서로 되돌렸습니다";
+});
+RAIL.addEventListener("click", function(e){
+  var mv = e.target.closest("[data-mv]");
+  if(mv && navEditing()){ e.stopPropagation(); navMove(mv.closest(".navb"), +mv.dataset.mv); }
+}, true);
+RAIL.addEventListener("keydown", function(e){
+  var b = e.target.closest(".navb");
+  if(!b || !navEditing()) return;
+  if(e.key === "ArrowUp" || e.key === "ArrowDown"){ e.preventDefault(); navMove(b, e.key === "ArrowUp" ? -1 : 1); b.focus(); }
+  else if(e.key === "Escape"){ setNavEdit(false); document.getElementById("navEdit").focus(); }
+});
+var navDrag = null;
+RAIL.addEventListener("dragstart", function(e){
+  var b = e.target.closest(".navb"); if(!b || !navEditing()) return;
+  navDrag = b; b.classList.add("dragging");
+  try{ e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", b.dataset.go); }catch(err){}
+});
+RAIL.addEventListener("dragover", function(e){
+  if(!navDrag) return;
+  e.preventDefault();
+  var t = e.target.closest(".navb"); if(!t || t === navDrag) return;
+  var r = t.getBoundingClientRect(), after = (e.clientY - r.top) > r.height / 2;
+  RAIL.insertBefore(navDrag, after ? t.nextSibling : t);
+});
+RAIL.addEventListener("dragend", function(){
+  if(!navDrag) return;
+  navDrag.classList.remove("dragging"); saveNavOrder(); navAnnounce(navDrag); navDrag = null;
+});
+
 /* ===================== 부팅 ===================== */
 load();
 Array.prototype.forEach.call(document.querySelectorAll(".navb"), function(b){
-  b.addEventListener("click", function(){ go(b.dataset.go); });
+  b.addEventListener("click", function(){ if(navEditing()) return; go(b.dataset.go); });   // 편집 중에는 화면을 바꾸지 않는다
 });
 window.addEventListener("hashchange", function(){ go((location.hash||"").replace("#/",""), false); });
 go((location.hash||"").replace("#/","") || "today", false);
