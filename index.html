@@ -418,6 +418,27 @@ table.dt td.dim{color:var(--ink-3); font-size:11.5px}
 .themebtn:hover{background:var(--surface-2); color:var(--ink)}
 .themebtn svg{width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
 .appbar .right{display:flex; align-items:center; gap:12px}
+/* 휴대폰: 메뉴 순서 편집 창 */
+.navorderbtn{display:none}
+.navdlg{border:none; padding:0; margin:auto auto 0; width:100%; max-width:520px; max-height:82vh; border-radius:16px 16px 0 0;
+  background:var(--surface); color:var(--ink); box-shadow:0 -8px 30px rgba(0,0,0,.18)}
+.navdlg::backdrop{background:rgba(0,0,0,.35)}
+.navdlg-hd{padding:16px 18px 8px}
+.navdlg-hd h2{font-size:16px}
+.navdlg-hd p{font-size:12px; color:var(--ink-3); margin-top:3px}
+.navdlg ol{list-style:none; margin:0; padding:4px 10px; overflow:auto; max-height:calc(82vh - 140px)}
+.navdlg li{display:flex; align-items:center; gap:10px; padding:4px 6px; border-radius:var(--r-s); background:var(--surface); touch-action:pan-y}
+.navdlg li + li{border-top:1px solid var(--line-soft)}
+.navdlg li.dragging{background:var(--accent-soft); box-shadow:0 2px 10px rgba(0,0,0,.12); position:relative; z-index:1}
+.navdlg .hdl{display:grid; place-items:center; width:40px; height:44px; color:var(--ink-3); font-size:18px; cursor:grab; touch-action:none; user-select:none}
+.navdlg li svg{width:18px; height:18px; flex:none; stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; opacity:.8}
+.navdlg .lb{flex:1; font-size:14px; font-weight:500}
+.navdlg .ar{display:grid; place-items:center; width:44px; height:44px; border-radius:var(--r-s); border:1px solid var(--line); background:var(--surface-2); font-size:12px; color:var(--ink-2)}
+.navdlg .ar:disabled{opacity:.3}
+.navdlg-ft{display:flex; justify-content:space-between; gap:10px; padding:12px 18px calc(14px + env(safe-area-inset-bottom)); border-top:1px solid var(--line)}
+.navdlg-ft button{min-height:44px; padding:0 16px; border-radius:var(--r-s); border:1px solid var(--line); background:var(--surface-2); font-size:13.5px}
+.navdlg-ft button.primary{background:var(--accent); border-color:var(--accent); color:var(--on-accent); font-weight:600}
+@media (max-width:760px){ .navorderbtn{display:inline-flex} }
 
 /* ============ 목차 · 문헌 ============ */
 .toc{display:flex; flex-direction:column; gap:2px}
@@ -514,11 +535,16 @@ table.dt td.dim{color:var(--ink-3); font-size:11.5px}
     </div>
     <span class="srlive" id="navLive" aria-live="polite"></span>
   </nav>
+  <dialog class="navdlg" id="navDlg" aria-labelledby="navDlgT">
+    <div class="navdlg-hd"><h2 id="navDlgT">메뉴 순서</h2><p>≡ 를 끌거나 ▲▼ 로 옮기면 아래 메뉴에 바로 반영됩니다</p></div>
+    <ol id="navDlgList"></ol>
+    <div class="navdlg-ft"><button type="button" id="navDlgReset">기본 순서로</button><button type="button" class="primary" id="navDlgDone">완료</button></div>
+  </dialog>
 
   <div class="col">
     <header class="appbar">
       <h1 id="scTitle">오늘</h1>
-      <div class="right"><button class="themebtn" data-theme-toggle aria-label="화면 밝게/어둡게 전환"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="themeTxt">어둡게</span></button><div class="meta" id="scMeta"></div></div>
+      <div class="right"><button class="themebtn" data-theme-toggle aria-label="화면 밝게/어둡게 전환"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="themeTxt">어둡게</span></button><button class="themebtn navorderbtn" id="navOrderBtn" type="button" aria-haspopup="dialog" aria-label="메뉴 순서 바꾸기"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="m3 9 2-3 2 3M3 15l2 3 2-3"/></svg><span>메뉴</span></button><div class="meta" id="scMeta"></div></div>
     </header>
     <main id="screen"></main>
   </div>
@@ -2176,6 +2202,66 @@ RAIL.addEventListener("dragend", function(){
   if(!navDrag) return;
   navDrag.classList.remove("dragging"); saveNavOrder(); navAnnounce(navDrag); navDrag = null;
 });
+
+/* 휴대폰: 아래 메뉴 막대는 좁아 그 자리에서 옮기기 어렵다 — 목록 창에서 옮긴다(넓은 화면에서도 같은 순서를 쓴다) */
+var NAVDLG = document.getElementById("navDlg"), NAVLIST = document.getElementById("navDlgList");
+function navDlgRender(focusGo, focusDir){
+  var items = navItems(), h = "";
+  items.forEach(function(b, i){
+    var svg = b.querySelector("svg").outerHTML, lb = esc(navLabel(b));
+    h += '<li data-go="' + b.dataset.go + '"><span class="hdl" aria-hidden="true">≡</span>' + svg + '<span class="lb">' + lb + '</span>' +
+      '<button type="button" class="ar" data-dir="-1" aria-label="' + lb + ' 위로"' + (i === 0 ? " disabled" : "") + '>▲</button>' +
+      '<button type="button" class="ar" data-dir="1" aria-label="' + lb + ' 아래로"' + (i === items.length - 1 ? " disabled" : "") + '>▼</button></li>';
+  });
+  NAVLIST.innerHTML = h;
+  if(focusGo){
+    var btn = NAVLIST.querySelector('li[data-go="' + focusGo + '"] .ar[data-dir="' + focusDir + '"]');
+    if(btn && btn.disabled) btn = NAVLIST.querySelector('li[data-go="' + focusGo + '"] .ar:not([disabled])');
+    if(btn) btn.focus();
+  }
+}
+function navByGo(k){ return RAIL.querySelector('.navb[data-go="' + k + '"]'); }
+document.getElementById("navOrderBtn").addEventListener("click", function(){
+  navDlgRender();
+  if(NAVDLG.showModal) NAVDLG.showModal(); else NAVDLG.setAttribute("open", "");
+});
+document.getElementById("navDlgDone").addEventListener("click", function(){ if(NAVDLG.close) NAVDLG.close(); else NAVDLG.removeAttribute("open"); });
+NAVDLG.addEventListener("close", saveNavOrder);
+document.getElementById("navDlgReset").addEventListener("click", function(){
+  applyNavOrder(NAV_DEFAULT); saveNavOrder(); navDlgRender(); document.getElementById("navLive").textContent = "기본 순서로 되돌렸습니다";
+});
+NAVLIST.addEventListener("click", function(e){
+  var a = e.target.closest(".ar"); if(!a || a.disabled) return;
+  var k = a.closest("li").dataset.go;
+  navMove(navByGo(k), +a.dataset.dir);
+  navDlgRender(k, a.dataset.dir);
+});
+/* ≡ 손잡이 끌기 — 터치·마우스 모두 포인터 이벤트로 */
+var dragLi = null;
+NAVLIST.addEventListener("pointerdown", function(e){
+  var hd = e.target.closest(".hdl"); if(!hd) return;
+  dragLi = hd.closest("li"); dragLi.classList.add("dragging");
+  try{ hd.setPointerCapture(e.pointerId); }catch(err){}
+  e.preventDefault();
+});
+NAVLIST.addEventListener("pointermove", function(e){
+  if(!dragLi) return;
+  var lis = Array.prototype.slice.call(NAVLIST.children), y = e.clientY;
+  for(var i = 0; i < lis.length; i++){
+    var li = lis[i]; if(li === dragLi) continue;
+    var r = li.getBoundingClientRect();
+    if(y > r.top && y < r.bottom){ NAVLIST.insertBefore(dragLi, y < r.top + r.height / 2 ? li : li.nextSibling); break; }
+  }
+});
+function dragEnd(){
+  if(!dragLi) return;
+  var k = dragLi.dataset.go;
+  dragLi.classList.remove("dragging"); dragLi = null;
+  applyNavOrder(Array.prototype.map.call(NAVLIST.children, function(li){ return li.dataset.go; }));
+  saveNavOrder(); navDlgRender(); navAnnounce(navByGo(k));
+}
+NAVLIST.addEventListener("pointerup", dragEnd);
+NAVLIST.addEventListener("pointercancel", dragEnd);
 
 /* ===================== 부팅 ===================== */
 load();
