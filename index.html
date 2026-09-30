@@ -18,9 +18,9 @@
 :root{
   --ground:#EFF2F0; --surface:#FFFFFF; --surface-2:#E7ECE9; --surface-3:#DAE1DD;
   --line:#D6DDD9; --line-soft:#E4EAE6; --line-strong:#B0BCB6;
-  --ink:#121B19; --ink-2:#4E5A55; --ink-3:#7B8782;
+  --ink:#121B19; --ink-2:#4E5A55; --ink-3:#5F6D67;
   --accent:#0F5F58; --accent-ink:#0B4741; --accent-soft:#D3E7E3; --accent-line:#7FBAB2; --on-accent:#FFFFFF;
-  --warn:#A84E1A; --warn-soft:#F6E1D1; --warn-line:#DCAC84;
+  --warn:#9B4616; --warn-soft:#F6E1D1; --warn-line:#DCAC84;
   --grid:#E2E9E5;
   --shadow:0 1px 2px rgba(18,27,25,.05), 0 14px 32px -22px rgba(18,27,25,.35);
   --shadow-lift:0 1px 2px rgba(18,27,25,.06), 0 22px 48px -28px rgba(18,27,25,.45);
@@ -36,7 +36,7 @@
   :root:not([data-theme="light"]){
     --ground:#0A100F; --surface:#141B19; --surface-2:#1C2523; --surface-3:#26312E;
     --line:#2A3532; --line-soft:#1F2927; --line-strong:#41504B;
-    --ink:#E9F0ED; --ink-2:#9BA9A4; --ink-3:#78857F;
+    --ink:#E9F0ED; --ink-2:#9BA9A4; --ink-3:#8A9791;
     --accent:#63C4B6; --accent-ink:#98DED2; --accent-soft:#11332F; --accent-line:#2F6E65; --on-accent:#05201C;
     --warn:#E39A62; --warn-soft:#3A2519; --warn-line:#77502F;
     --grid:#222C2A;
@@ -47,7 +47,7 @@
 :root[data-theme="dark"]{
   --ground:#0A100F; --surface:#141B19; --surface-2:#1C2523; --surface-3:#26312E;
   --line:#2A3532; --line-soft:#1F2927; --line-strong:#41504B;
-  --ink:#E9F0ED; --ink-2:#9BA9A4; --ink-3:#78857F;
+  --ink:#E9F0ED; --ink-2:#9BA9A4; --ink-3:#8A9791;
   --accent:#63C4B6; --accent-ink:#98DED2; --accent-soft:#11332F; --accent-line:#2F6E65; --on-accent:#05201C;
   --warn:#E39A62; --warn-soft:#3A2519; --warn-line:#77502F;
   --grid:#222C2A;
@@ -326,7 +326,7 @@ textarea{resize:vertical; min-height:54px; line-height:1.55}
 .wk[data-st="done"] .wbar, .wk[data-st="late"] .wbar, .wk[data-st="now"] .wbar{opacity:1}
 .wk[data-st="done"]{background:var(--accent-soft)} .wk[data-st="done"] .wn{color:var(--accent-ink)}
 .wk[data-st="late"]{background:var(--warn-soft)} .wk[data-st="late"] .wn{color:var(--warn)}
-.wk[data-st="late"] .wbar i{background:var(--warn)}
+.wk[data-st="late"] .wbar i{background:var(--warn)} .wk[data-st="late"] .wd, .wk[data-st="late"] .wfrac{color:var(--ink-2)}
 .wk[data-st="now"]{background:var(--surface); border-color:var(--accent); box-shadow:inset 3px 0 0 var(--accent)}
 .wk[data-st="now"] .wn{color:var(--accent)}
 .wk.sel{border-color:var(--ink); box-shadow:inset 3px 0 0 var(--ink)}
@@ -389,9 +389,14 @@ tr.done td{color:var(--ink-3)}
 
 
 /* ============ 데이터 화면 ============ */
-:root{ --seq1:#DCEBE8; --seq2:#A9D2CA; --seq3:#6FB5A9; --seq4:#358E81; --seq5:#0F5F58; --nodata:#E7ECE9 }
+:root{ --seq1:#DCEBE8; --seq2:#A9D2CA; --seq3:#6FB5A9; --seq4:#2E8275; --seq5:#0F5F58; --nodata:#E7ECE9 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --seq1:#153A35; --seq2:#1E5A52; --seq3:#2F8074; --seq4:#4FA99A; --seq5:#8ED3C7; --nodata:#1C2523 } }
 :root[data-theme="dark"]{ --seq1:#153A35; --seq2:#1E5A52; --seq3:#2F8074; --seq4:#4FA99A; --seq5:#8ED3C7; --nodata:#1C2523 }
+/* 상관표 글자색 — 어두운 테마는 색 단계가 밝아질수록 글자를 어둡게 (4.5:1 이상) */
+:root[data-theme="dark"] .corr td[data-q="3"]{color:#fff}
+:root[data-theme="dark"] .corr td[data-q="4"], :root[data-theme="dark"] .corr td[data-q="5"]{color:#05201C}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]):not([data-theme="angel"]) .corr td[data-q="3"]{color:#fff}
+  :root:not([data-theme="light"]):not([data-theme="angel"]) .corr td[data-q="4"], :root:not([data-theme="light"]):not([data-theme="angel"]) .corr td[data-q="5"]{color:#05201C} }
 :root[data-theme="angel"]{ --seq1:#2A1D0C; --seq2:#5A3C14; --seq3:#8A5A1C; --seq4:#DD9A38; --seq5:#FFC46B; --nodata:#131624; }   /* 금 한 가지 색의 명암 — 위 규칙(운영체제 다크 모드)보다 뒤에 있어야 이긴다 */
 .dgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px}
 .dgrid > .panel{min-width:0}
